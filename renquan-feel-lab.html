@@ -272,6 +272,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <p class="fsub">序号会自动取该档位的下一个，变体从 A 开始。</p>
         <div class="opts" id="lib-grade"></div>
       </div>
+      <p class="fsub" id="lib-draft" hidden style="color:var(--b); margin:0 0 11px">
+        这个品类的码还没定稿，暂时建不了型号。品类码是编码前缀、一启用就永久占用，
+        按原则三也收不回来——所以先把码和字段定下来，再开。</p>
       <div class="mact" style="border:0; padding:0; margin:0">
         <button class="ghost key" id="lib-add">+ 新建自家型号</button>
         <button class="ghost" id="lib-bench">+ 新建对标品</button>
@@ -294,8 +297,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <span class="flabel">型号</span>
         <div class="opts" id="log-model"></div>
       </div>
+      <div class="field">
+        <span class="flabel">这条是谁说的</span>
+        <p class="fsub">客户的话和内测的话都进同一张表、用同一套问法，但必须标清来源——内测是受控的，客户是他自己挑的那一款，两者不能合成一个百分比。</p>
+        <div class="opts" id="log-source"></div>
+      </div>
       <div class="row" style="margin-bottom:17px">
-        <div><span class="flabel">测试人</span><input type="text" id="log-tester" placeholder="姓名或代号"></div>
+        <div><span class="flabel">姓名 / 代号</span><input type="text" id="log-tester" placeholder="姓名或代号"></div>
         <div><span class="flabel">日期</span><input type="date" id="log-date"></div>
       </div>
       <div id="log-dyn"></div>
@@ -391,7 +399,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <!-- 客户页 -->
   <section class="tab" id="tab-cust" hidden>
     <h2>生成客户页</h2>
-    <p class="hint"><strong>产品库是唯一数据源，客户页是从它生成的产物——不是你要维护的第二处。</strong>改完型号、改完状态，回来点一次导出，拿到一个完整的 html 文件，扔到你自己的空间或者让我发成链接。客户那边只看到产品名，但他复制回来的那段文字里带着型号码。</p>
+    <p class="hint"><strong>产品库是唯一数据源，客户页是从它生成的产物——不是你要维护的第二处。</strong>改完型号、改完状态，回来点一次导出，拿到一个完整的 html 文件，扔到你自己的空间。客户那边只看到产品名，但他复制回来的那段文字里带着型号码。</p>
+    <p class="hint"><strong>发给客户时，链接末尾要带上他买的那一件</strong>，比如 <code>…/feedback.html?m=FW-401A</code>。带了，客户打开就是他那一件，只需确认一下；没带，页面会退回让他自己从列表里挑——<strong>而他大概率会挑错，挑错的记录比没有记录更糟</strong>，它会挂到错的型号上，把那一款的数字污染掉，你还看不出来。每个型号的后缀在下面列着。</p>
     <div class="card" style="padding:14px">
       <div class="field">
         <span class="flabel">品类</span>
@@ -461,14 +470,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
                 stayField:"stayed", kicked:"kicked", slipped:"slipped",
                 dampField:"damp", wet:["wet"] },
         fields:[
-          { key:"warmth", label:"温度", sub:"半夜和清早，脚是什么感觉", options:[
+          { key:"warmth", label:"温度", ask:"半夜和清早，脚是什么感觉", sub:"半夜和清早，脚是什么感觉", options:[
             {v:"cold",t:"还是凉的",tone:"w"},{v:"ok",t:"刚好",tone:"g"},
             {v:"warm",t:"有点热",tone:"w"},{v:"hot",t:"热得睡不好",tone:"b"}]},
-          { key:"stayed", label:"早上", sub:"醒来还在脚上吗。踢掉和滑落要分开——前者多半是太热，后者才是版型", options:[
+          { key:"stayed", label:"早上", ask:"早上醒来，它还在脚上吗", sub:"醒来还在脚上吗。踢掉和滑落要分开——前者多半是太热，后者才是版型", options:[
             {v:"on",t:"还在",tone:"g"},{v:"kicked",t:"我踢掉的",tone:"b"},{v:"slipped",t:"滑下去了",tone:"w"}]},
-          { key:"damp", label:"干潮", sub:"脱下来里面是干的吗", options:[
+          { key:"damp", label:"干潮", ask:"脱下来的时候，里面是干的吗", sub:"脱下来里面是干的吗", options:[
             {v:"dry",t:"干爽",tone:"g"},{v:"slight",t:"有点潮",tone:"w"},{v:"wet",t:"明显潮",tone:"b"}]},
-          { key:"wrap", label:"包裹", sub:"脚踝那一圈的贴合", options:[
+          { key:"wrap", label:"包裹", ask:"脚踝那一圈，裹得怎么样", sub:"脚踝那一圈的贴合", options:[
             {v:"good",t:"刚好裹住",tone:"g"},{v:"loose",t:"松",tone:"w"},{v:"tight",t:"勒",tone:"b"}]}
         ],
         headline:{field:"stayed", good:"on", label:"在脚上率"} },
@@ -484,16 +493,30 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         ],
         headline:{field:"scent", good:"ok", label:"香气合适率"} },
 
-      { code:"XN", name:"（第三品类 · 待定）", unit:"件", pname:"",
-        fields:[{ key:"overall", label:"整体感受", sub:"先占位，按这个品类真正要问的改掉", options:[
+      /* draft:true = 码还没定稿，不能建型号。
+         品类码一启用就永久占用（它是编码前缀），所以占位品类必须建不出东西来，
+         否则手滑建一个 SW-401A，这个码就按原则三永远回收不了了。
+         定稿后把 draft 去掉、把 fields 换成这个品类真正要问的，就能用。 */
+      { code:"SW", name:"云肩披肩", unit:"件", pname:"", draft:true,
+        fields:[{ key:"overall", label:"整体感受", sub:"占位字段，定稿时整组换掉", options:[
           {v:"good",t:"很好",tone:"g"},{v:"ok",t:"还行",tone:"w"},{v:"bad",t:"不太好",tone:"b"}]}],
         headline:{field:"overall", good:"good", label:"说好的比例"} },
 
-      { code:"AC", name:"（第四品类 · 待定）", unit:"件", pname:"",
-        fields:[{ key:"overall", label:"整体感受", sub:"先占位", options:[
+      { code:"HB", name:"抹额", unit:"条", pname:"", draft:true,
+        fields:[{ key:"overall", label:"整体感受", sub:"占位字段，定稿时整组换掉", options:[
+          {v:"good",t:"很好",tone:"g"},{v:"ok",t:"还行",tone:"w"},{v:"bad",t:"不太好",tone:"b"}]}],
+        headline:{field:"overall", good:"good", label:"说好的比例"} },
+
+      { code:"EM", name:"眼罩", unit:"个", pname:"", draft:true,
+        fields:[{ key:"overall", label:"整体感受", sub:"占位字段，定稿时整组换掉", options:[
           {v:"good",t:"很好",tone:"g"},{v:"ok",t:"还行",tone:"w"},{v:"bad",t:"不太好",tone:"b"}]}],
         headline:{field:"overall", good:"good", label:"说好的比例"} }
     ],
+
+    /* 记录来源。研发端和售后端写进同一个 records，但必须分得开：
+       内测是受控的（同一个人可以先试 A 再试 B），客户是观察的（他只有他买的那一款，
+       而且是他自己挑的）。合成一个百分比会把选品偏差算成产品性能。 */
+    sources:[{v:"self",t:"我自己"},{v:"tester",t:"测试人"},{v:"customer",t:"客户"}],
 
     washes:[{v:"0",t:"还没洗",tone:""},{v:"1",t:"一两次",tone:""},{v:"3",t:"三到五次",tone:""},{v:"6",t:"六次以上",tone:""}],
     change:[{v:"none",t:"没变化",tone:"g"},{v:"hard",t:"变硬了",tone:"w"},{v:"thin",t:"变薄了",tone:"w"},
@@ -631,6 +654,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       return (m.status||"test")===sel.libState;
     });
     document.getElementById("lib-seed").hidden = (c.code!=="FW");
+    document.getElementById("lib-add").disabled = !!c.draft;
+    document.getElementById("lib-bench").disabled = !!c.draft;
+    document.getElementById("lib-draft").hidden = !c.draft;
 
     var noimg=all.filter(function(m){ return !m.imageId; }).length;
     var wipC=wipCount(c.code), wipAll=wipCount(null), lim=CONFIG.wipLimit;
@@ -734,11 +760,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     return body.code;
   }
   function addOwn(cat,grade){
+    if(C(cat).draft){ setStatus("品类 "+cat+" 的码还没定稿，建不了型号——码一发出去就永久占用了。",true); return null; }
     return create({cat:cat, kind:"own", grade:grade, seq:nextSeq(cat,grade), variant:"A", gen:1,
       status:"test", why:"", rank:3, series:CONFIG.series[0].code, pname:C(cat).pname||"",
       vname:"", alias:"", spec:"", cost:null, imageId:null});
   }
   function addBench(cat){
+    if(C(cat).draft){ setStatus("品类 "+cat+" 的码还没定稿，建不了型号。",true); return null; }
     return create({cat:cat, kind:"bench", seq:nextBenchSeq(cat), series:null,
       pname:"", vname:"", alias:"", name:"", spec:"", cost:null, imageId:null});
   }
@@ -795,6 +823,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     var ch=host.querySelector('[data-dyn="__change"]');
     if(ch) chips(ch,CONFIG.change,draft.__change,function(v){ draft.__change=v; render(); });
 
+    chips(document.getElementById("log-source"),CONFIG.sources,draft.__source||"self",function(v){ draft.__source=v; render(); });
+
     var sc=[1,2,3,4,5].map(function(n){return {v:String(n),t:String(n)};});
     chips(document.getElementById("log-feel"),sc,draft.feel,function(v){ draft.feel=v; render(); });
     chips(document.getElementById("log-look"),sc,draft.look,function(v){ draft.look=v; render(); });
@@ -806,12 +836,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     var c=C(sel.log), vals={};
     c.fields.forEach(function(f){ vals[f.key]=draft[f.key]; });
     put("records",uid(),{ code:draft.code, cat:c.code, date:document.getElementById("log-date").value||today(),
-      tester:document.getElementById("log-tester").value.trim(), values:vals,
+      tester:document.getElementById("log-tester").value.trim(),
+      source:draft.__source||"self", values:vals,
       washes:draft.__washes, change:draft.__change||null,
       feel:draft.feel?parseInt(draft.feel,10):null, look:draft.look?parseInt(draft.look,10):null,
       words:document.getElementById("log-words").value.trim(),
       quotable:document.getElementById("log-quotable").checked });
-    draft={code:draft.code};
+    draft={code:draft.code, __source:draft.__source};
     document.getElementById("log-words").value="";
     document.getElementById("log-quotable").checked=false;
     render();
@@ -828,8 +859,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       var wo=optT(CONFIG.washes,r.washes), co=r.change?optT(CONFIG.change,r.change):null;
       if(wo&&r.washes!=="0") pills+=pill("洗"+wo.t,"");
       if(co) pills+=pill(co.t,co.tone);
+      var so=optT(CONFIG.sources,r.source||"self");
       return '<div class="fitem"><span class="fcode'+(isBench(m)?" bench":"")+'">'+esc(r.code)+'</span>'+
-        '<span class="fwho">'+esc(r.tester||"未署名")+'</span>'+pills+
+        '<span class="fwho">'+esc(r.tester||"未署名")+'</span>'+
+        (so?'<span class="pill'+(r.source==="customer"?" ser":"")+'">'+esc(so.t)+'</span>':'')+pills+
         '<span class="fdate">'+esc(String(r.date).slice(5))+'</span>'+
         '<button class="ghost danger" data-del="records" data-id="'+esc(r.id)+'" style="padding:3px 8px;font-size:10px">删</button>'+
         (r.words?'<span class="fnote">'+(r.quotable?'<span class="pill g" style="margin-right:6px">可引用</span>':'')+esc(r.words)+'</span>':'')+'</div>';
@@ -916,15 +949,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     var dist=c.fields.map(function(f){
       return {f:f, counts:f.options.map(function(o){ return rs.filter(function(r){return (r.values||{})[f.key]===o.v;}).length; })};
     });
-    var hd=c.headline, head=null;
-    if(hd){
-      var n=rs.filter(function(r){ return (r.values||{})[hd.field]; }).length;
-      var good=rs.filter(function(r){ return (r.values||{})[hd.field]===hd.good; }).length;
-      head={label:hd.label, rate:n?good/n:null, n:n};
+    var hd=c.headline, head=null, headIn=null, headCu=null;
+    function rateOf(list){
+      var k=list.filter(function(r){ return (r.values||{})[hd.field]; }).length;
+      var g=list.filter(function(r){ return (r.values||{})[hd.field]===hd.good; }).length;
+      return {label:hd.label, rate:k?g/k:null, n:k};
     }
+    var inside=rs.filter(function(r){ return (r.source||"self")!=="customer"; });
+    var cust=rs.filter(function(r){ return r.source==="customer"; });
+    if(hd){ head=rateOf(rs); headIn=rateOf(inside); headCu=rateOf(cust); }
     var washed=rs.filter(function(r){ return r.washes && r.washes!=="0"; });
     var feels=rs.filter(function(r){return r.feel;}), looks=rs.filter(function(r){return r.look;});
-    return { m:m, c:c, n:rs.length, testers:Object.keys(t).length, dist:dist, head:head,
+    return { m:m, c:c, n:rs.length, nIn:inside.length, nCu:cust.length,
+      testers:Object.keys(t).length, dist:dist, head:head, headIn:headIn, headCu:headCu,
       washedN:washed.length, chCounts:CONFIG.change.map(function(o){ return washed.filter(function(r){return r.change===o.v;}).length; }),
       feel:feels.length?feels.reduce(function(a,b){return a+b.feel;},0)/feels.length:null,
       look:looks.length?looks.reduce(function(a,b){return a+b.look;},0)/looks.length:null,
@@ -958,7 +995,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
           (isBench(m)?'<span class="pill">对标品</span>':(s?'<span class="pill ser">'+esc(s.name)+'</span>':''))+
           '<span class="scmeta">'+(m.cost!=null&&m.cost!==""?(isBench(m)?"售价 ":"成本 ")+Number(m.cost).toFixed(2)+" 元":"未填")+'</span></div>'+
         '<div class="metrics">'+
-          mcell(x.head?x.head.label:"主指标", x.head&&x.head.rate!=null?Math.round(x.head.rate*100)+"%":"—", x.n+" 条")+
+          mcell(x.head?x.head.label:"主指标", x.head&&x.head.rate!=null?Math.round(x.head.rate*100)+"%":"—",
+                x.nCu? (x.n+" 条 · 内测 "+x.nIn+" 客户 "+x.nCu) : (x.n+" 条"))+
           mcell("测试人", String(x.testers), "人")+
           mcell("手感", x.feel==null?"—":x.feel.toFixed(1), "均分")+
           mcell("看着值钱", x.look==null?"—":x.look.toFixed(1), "均分")+
@@ -1009,6 +1047,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         if(a-b>=25) parts.push('<strong>掉的原因大概是太热</strong>：觉得热的记录里 '+a+'% 没留在脚上，温度正常的只有 '+b+'%。先减薄，别改版型。');
         else if(b>=40) parts.push('<strong>掉的原因大概是版型</strong>：温度正常也有 '+b+'% 掉了。改袜口或后跟弧线。');
       }
+    }
+    if(x.headIn&&x.headCu&&x.headIn.rate!=null&&x.headCu.rate!=null&&x.headIn.n>=3&&x.headCu.n>=5){
+      var gap=Math.round((x.headIn.rate-x.headCu.rate)*100);
+      if(gap>=15) parts.push('<strong>内测比客户好看 '+gap+' 个百分点</strong>（'+esc(x.head.label)+'：内测 '+
+        Math.round(x.headIn.rate*100)+'% ／ 客户 '+Math.round(x.headCu.rate*100)+'%，'+x.headIn.n+' 条对 '+x.headCu.n+
+        ' 条）。以客户那个数为准——差出来的部分是你的测试环境和真实卧室的距离。');
+      else if(gap<=-15) parts.push('客户反而比内测好 '+(-gap)+' 个百分点。多半是客户自己挑对了款，不是产品变好了——别把它读成改进生效。');
     }
     if(x.badWash>=2) parts.push('<strong>洗后已有 '+x.badWash+' 条报结块或缩水</strong>——结构性问题，不是调克重能解决的。');
     if(x.testers<3&&x.n>=5) parts.push('这 '+x.n+' 条只来自 '+x.testers+' 个人，体质差异还没被覆盖到。');
@@ -1187,6 +1232,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         '<span class="fwho">'+esc([m.pname||c.pname,m.vname].filter(Boolean).join(" ")||m.alias||"未命名")+'</span>'+
         (m.status==="retired"?pill("已停产","w"):pill("已上线","g"))+
         (m.rank==null||m.rank===""?pill((c.rankLabel||"档位序")+" 未填","b"):pill((c.rankLabel||"档")+" "+m.rank,""))+
+        '<span class="fnote">发给买了这一件的客户时，链接末尾加 <code>?m='+esc(m.code)+'</code></span>'+
         '</div>';
     }).join("")+'</div>'+
     (noRank.length?'<p class="fsub" style="margin-top:9px;color:var(--b)">有 '+noRank.length+' 个型号没填'+esc(c.rankLabel||"档位序")+'——客户页靠它算"往下推一档"，不填就推不出来。</p>':'');
@@ -1198,7 +1244,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     var data={
       brand:CONFIG.brand, latin:CONFIG.latin, cat:c.code, catName:c.name,
       rankLabel:c.rankLabel||"档位序", match:c.match||null,
-      fields:c.fields.map(function(f){ return {key:f.key,label:f.label,sub:f.sub||"",options:f.options}; }),
+      fields:c.fields.map(function(f){ return {key:f.key,label:f.label,ask:f.ask||"",sub:f.sub||"",options:f.options}; }),
       models:list.map(function(m){
         return { code:m.code, rank:m.rank,
           name:[m.pname||c.pname,m.vname].filter(Boolean).join(" ")||m.alias||m.code,
@@ -1264,6 +1310,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'color:var(--ink);border:1px solid var(--ink3);border-radius:6px;padding:13px 20px;cursor:pointer;width:100%;min-height:48px;margin-top:12px}',
 '#copied{font-size:12.5px;color:var(--leaf);margin:10px 0 0;min-height:19px}',
 '.note{font-size:12.5px;color:var(--ink3);margin-top:26px;line-height:1.65}',
+'.yours{margin-top:22px;background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--gold);',
+'border-radius:6px;padding:15px 17px;box-shadow:var(--sh)}',
+'.yours b{display:block;font-family:"Noto Serif SC",serif;font-size:19px;font-weight:600;margin-top:5px}',
+'.yours em{display:block;font-style:normal;font-size:13px;color:var(--ink3);margin-top:5px}',
+'.unlock{font-family:inherit;font-size:13px;background:transparent;color:var(--ink3);border:0;',
+'border-bottom:1px solid var(--rule);padding:0 0 1px;margin-top:11px;cursor:pointer}',
 '[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{transition:none!important}}',
 '</style></head><body><div class="page" id="app"></div>',
 '<script>',
@@ -1271,16 +1323,22 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'var a={},steps=[],cur=0,el=document.getElementById("app");',
 'function esc(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){',
 'return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}',
-'steps.push({k:"model",label:"你手上这双是哪一版",sub:"吊牌上有写。记不清也没关系。",',
+'function M(code){for(var i=0;i<D.models.length;i++)if(D.models[i].code===code)return D.models[i];return null;}',
+/* 型号由链接指定：?m=FW-401A。客户自己从列表里挑，大概率挑错，
+   而挑错的记录比没有记录更糟——它会挂到错误的型号上，把那一款的数字污染掉，
+   而且你不知道它被污染了。链接里带不上时才退回自选。 */
+'var qm=(location.search.match(/[?&]m=([^&]+)/)||[])[1];',
+'var LOCK=qm?M(decodeURIComponent(qm)):null;',
+'if(LOCK){a.model=LOCK.code;}',
+'else{steps.push({k:"model",label:"你手上这一件是哪一版",sub:"吊牌上有写。记不清也没关系。",',
 'opts:D.models.map(function(m){return {v:m.code,t:m.name+(m.retired?"（已停产）":""),e:m.spec};})',
-'.concat([{v:"__unknown",t:"记不清了"}])});',
+'.concat([{v:"__unknown",t:"记不清了"}])});}',
 'steps.push({k:"nights",label:"大概用了几晚",opts:[{v:"1",t:"才一两晚"},{v:"2",t:"三五晚"},{v:"3",t:"一两周"},{v:"4",t:"更久，洗过几次了"}]});',
-'D.fields.forEach(function(f){steps.push({k:f.key,short:f.label,label:f.label==="温度"?"半夜和清早，脚是什么感觉":f.label,sub:f.sub,',
+'D.fields.forEach(function(f){steps.push({k:f.key,short:f.label,label:f.ask||f.label,sub:f.sub,',
 'opts:f.options.map(function(o){return {v:o.v,t:o.t};})});});',
 'steps.push({k:"overall",label:"总的来说呢",opts:[{v:"fit",t:"挺合适的",e:"会继续用"},',
 '{v:"misfit",t:"不太合适",e:"东西没坏，但感觉不对"},{v:"issue",t:"东西出了问题",e:"坏了、变形了、或者跟拿到时不一样了"}]});',
 'steps.push({k:"words",label:"还想说点什么吗",sub:"哪里硌、哪里勒、比想象的好或差——越具体越有用。不想写可以直接跳过。",free:true});',
-'function M(code){for(var i=0;i<D.models.length;i++)if(D.models[i].code===code)return D.models[i];return null;}',
 'function byRank(dir,from){var f=M(from);if(!f||f.rank==null)return null;var best=null;',
 'D.models.forEach(function(m){if(m.retired||m.rank==null)return;',
 'if(dir<0&&m.rank<f.rank&&(!best||m.rank>best.rank))best=m;',
@@ -1294,7 +1352,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'var w=a[mt.field],hot=mt.hot.indexOf(w)>=0,cold=mt.cold.indexOf(w)>=0;',
 'var st=mt.stayField?a[mt.stayField]:null,kicked=st===mt.kicked,slipped=st===mt.slipped;',
 'var wet=mt.dampField&&mt.wet.indexOf(a[mt.dampField])>=0;',
-'if(hot||(kicked&&hot)){var thinner=byRank(-1,a.model);',
+/* 原来是 if(hot||(kicked&&hot))——第二个条件被第一个完全包含，写了等于没写。
+   后果：客户答「温度刚好，但我半夜踢掉了」会掉到最后的兜底分支，被告诉"你这版就是对的"。
+   而字段说明自己写着：踢掉多半是太热。 */
+'if(hot||kicked){var thinner=byRank(-1,a.model);',
 'if(thinner)return{kind:"match",label:"建议换成",name:thinner.name,',
 'body:["你的情况是典型的<strong>偏厚</strong>"+(kicked?"，而且半夜自己蹬掉了":"")+(wet?"，里面还发潮":"")+"。",',
 'kicked?"半夜踢掉这件事，绝大多数时候不是不合脚，是太热了——身体在自己散热。所以先换薄的，别急着让我们收紧袜口，收紧只会更热。":"",',
@@ -1321,7 +1382,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'function head(){return \'<div class="mark">\'+esc(D.brand)+\'<small>\'+esc(D.latin)+\'</small></div>\';}',
 'function intro(){return \'<h1>用下来是什么样的，<br>能不能告诉我们</h1>\'+',
 '\'<p class="lede">人和人的体质不一样。同一件东西，有人嫌闷，有人嫌薄——这不是谁错了，是本来就该有不同的厚度。</p>\'+',
-'\'<p class="lede">所以我们想知道你这几晚是怎么过的。答完会告诉你哪一版更适合你；如果拿错了版本，我们给你换。</p><hr>\';}',
+'\'<p class="lede">所以我们想知道你这几晚是怎么过的。答完会告诉你哪一版更适合你；如果拿错了版本，我们给你换。</p>\'+',
+'(LOCK?\'<div class="yours"><span class="vlabel">你这一件</span><b>\'+esc(LOCK.name)+(LOCK.retired?"（已停产）":"")+\'</b>\'+',
+'(LOCK.spec?\'<em>\'+esc(LOCK.spec)+\'</em>\':"")+',
+'\'<button class="unlock" id="unlock">不是这一件？</button></div>\':"")+\'<hr>\';}',
 'function dots(){var h=\'<div class="dots">\';for(var i=0;i<steps.length;i++)h+=\'<span class="dot\'+(i<=cur?" on":"")+\'"></span>\';return h+"</div>";}',
 'function render(){var s=steps[cur];',
 'var h=head()+(cur===0?intro():"")+\'<section class="step"><span class="snum">\'+(cur+1)+" / "+steps.length+\'</span>\'+',
@@ -1332,6 +1396,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 '\'<button class="go" id="fin">看结果</button>\';}',
 'else{h+=\'<div class="choices">\'+s.opts.map(function(o){return \'<button class="ch" data-v="\'+esc(o.v)+\'" aria-pressed="\'+(a[s.k]===o.v?"true":"false")+\'">\'+esc(o.t)+(o.e?\'<em>\'+esc(o.e)+"</em>":"")+"</button>";}).join("")+"</div>";}',
 'h+="</section>"+dots();el.innerHTML=h;',
+'var ub=document.getElementById("unlock");',
+'if(ub)ub.addEventListener("click",function(){location.search="";});',
 'if(s.free){document.getElementById("fin").addEventListener("click",function(){',
 'a.words=document.getElementById("words").value.trim();a.consent=document.getElementById("consent").checked;result();});}',
 'else{Array.prototype.forEach.call(el.querySelectorAll(".ch"),function(b){b.addEventListener("click",function(){',
@@ -1407,7 +1473,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   });
   document.addEventListener("click",function(e){
     var b=e.target.closest?e.target.closest("[data-del]"):null; if(!b) return;
-    drop(b.getAttribute("data-del"),b.getAttribute("data-id"));
+    var coll=b.getAttribute("data-del"), id=b.getAttribute("data-id");
+    if(coll==="models"){
+      var m=model(id);
+      if(m && recsOf(m.code).length){
+        setStatus(m.code+" 已经有 "+recsOf(m.code).length+" 条记录，不能删。要停掉就把状态改成「已淘汰」并写明原因——原则三：绝不复用，绝不回收。",true);
+        return;
+      }
+      /* 序号是按现有型号的 max+1 算的。删掉档位里最后一个，下一个新建就会拿到同一个序号，
+         编码就被复用了。所以删除只留给「刚建错、还没记过东西」这一种情况，而且要确认。 */
+      if(!window.confirm("删除 "+(m?m.code:id)+"？\n\n只有刚建错的型号才该走这里。已经投入过的一律改状态，不要删——删掉之后这个序号会被下一个新建型号拿走。"))
+        return;
+    }
+    if(coll==="records" && !window.confirm("删掉这条记录？")) return;
+    drop(coll,id);
   });
   Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(btn){
     btn.addEventListener("click",function(){
