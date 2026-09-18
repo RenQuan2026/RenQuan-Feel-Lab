@@ -1,0 +1,1445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<!-- 纫荃 SEWN SEASONS · 感受测试台（独立版：云端、图片上传与导出下载不可用，记录存本机浏览器） -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  :root{ color-scheme: light; padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px); }
+  body{ margin:0; font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:#fafaf8; }
+  img{ max-width:100%; } [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<title>纫荃感受测试台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600&display=swap">
+<style>
+:root{
+  --paper:#F2EDE0; --card:#FCFAF4; --sunk:#F5EFE1;
+  --ink:#1E1B16; --ink-2:#5B5447; --ink-3:#8B8271;
+  --rule:#DFD6C2; --rule-2:#EBE3D2;
+  --gold:#8F6E2E; --gold-2:#B08C4A; --leaf:#5F6E4E;
+  --g:#4A6B45; --w:#9A6B1E; --b:#9A3B26;
+  --chip:#EDE6D4; --chip-ink:#6B6250;
+  --shadow:0 1px 2px rgba(45,36,20,.05), 0 9px 26px -20px rgba(45,36,20,.3);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#14120E; --card:#1D1A14; --sunk:#242018;
+    --ink:#F2EDE0; --ink-2:#A79E8C; --ink-3:#7D7566;
+    --rule:#332E24; --rule-2:#2A2620;
+    --gold:#C9A868; --gold-2:#B08C4A; --leaf:#9AA687;
+    --g:#8FB184; --w:#D9A65A; --b:#D98070;
+    --chip:#2C271D; --chip-ink:#A79E8C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 9px 26px -20px rgba(0,0,0,.85);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14120E; --card:#1D1A14; --sunk:#242018;
+  --ink:#F2EDE0; --ink-2:#A79E8C; --ink-3:#7D7566;
+  --rule:#332E24; --rule-2:#2A2620;
+  --gold:#C9A868; --gold-2:#B08C4A; --leaf:#9AA687;
+  --g:#8FB184; --w:#D9A65A; --b:#D98070;
+  --chip:#2C271D; --chip-ink:#A79E8C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 9px 26px -20px rgba(0,0,0,.85);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--paper); color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  font-size:15px; line-height:1.62; -webkit-font-smoothing:antialiased}
+.app{max-width:920px; margin:0 auto; padding-inline:16px; padding-block:0 60px}
+
+header{padding-block:26px 0}
+.mark{font-family:"Noto Serif SC","Songti SC",serif; font-size:14px; font-weight:600; letter-spacing:.3em; color:var(--gold)}
+.mark small{display:block; font-family:"Jost",sans-serif; font-size:9px; font-weight:400; letter-spacing:.26em; color:var(--ink-3); margin-top:4px}
+h1{font-family:"Noto Serif SC","Songti SC",serif; font-weight:600; font-size:clamp(22px,5.4vw,29px); line-height:1.32; margin:18px 0 0; text-wrap:balance}
+.dek{color:var(--ink-2); font-size:13.5px; margin:10px 0 0; max-width:60ch}
+#status{font-size:12px; margin:11px 0 0; color:var(--ink-3)}
+#status.warn{color:var(--w)}
+
+nav{position:sticky; top:env(safe-area-inset-top,0px); z-index:30; background:var(--paper);
+  display:flex; gap:2px; overflow-x:auto; margin-top:18px; padding-block:9px; border-bottom:1px solid var(--rule)}
+nav button{font-family:inherit; font-size:13.5px; white-space:nowrap; background:transparent;
+  border:0; border-radius:4px; padding:8px 13px; color:var(--ink-3); cursor:pointer}
+nav button[aria-selected="true"]{background:var(--chip); color:var(--ink); font-weight:500}
+
+section.tab{padding-block:22px 0}
+h2{font-family:"Noto Serif SC","Songti SC",serif; font-size:16px; font-weight:600; margin:0 0 4px}
+.hint{color:var(--ink-3); font-size:12.5px; margin:0 0 15px; max-width:66ch}
+.hint code, code{background:var(--chip); padding:1px 5px; border-radius:3px; font-size:12.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.card{background:var(--card); border:1px solid var(--rule); border-radius:6px; box-shadow:var(--shadow); padding:16px; margin-bottom:13px}
+
+.flabel{font-family:"Jost",sans-serif; font-size:10px; font-weight:500; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; display:block}
+.fsub{font-size:12.5px; color:var(--ink-3); margin:-3px 0 8px}
+.field{margin-bottom:17px}
+.field:last-child{margin-bottom:0}
+.opts{display:flex; gap:7px; flex-wrap:wrap}
+.opt{font-family:inherit; font-size:14.5px; background:var(--sunk); color:var(--ink-2);
+  border:1px solid var(--rule); border-radius:5px; padding:9px 14px; cursor:pointer; min-height:42px}
+.opt[aria-pressed="true"]{background:var(--gold); border-color:var(--gold); color:var(--card); font-weight:500}
+.opt.g[aria-pressed="true"]{background:var(--g); border-color:var(--g)}
+.opt.w[aria-pressed="true"]{background:var(--w); border-color:var(--w)}
+.opt.b[aria-pressed="true"]{background:var(--b); border-color:var(--b)}
+.opt.sm{font-size:13px; padding:7px 11px; min-height:34px}
+.opt.code{font-variant-numeric:tabular-nums; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px}
+.opt.bench{border-style:dashed}
+.grouplab{font-family:"Jost",sans-serif; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); width:100%; margin:4px 0 -2px}
+input[type=text],input[type=number],input[type=date],textarea,select{
+  font-family:inherit; font-size:15px; font-variant-numeric:tabular-nums; width:100%; color:var(--ink);
+  background:var(--sunk); border:1px solid var(--rule); border-radius:5px; padding:9px 11px}
+textarea{min-height:76px; resize:vertical; font-size:14px}
+.row{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:11px}
+.check{display:flex; gap:10px; align-items:flex-start; background:var(--sunk);
+  border:1px solid var(--rule-2); border-radius:5px; padding:12px 13px; margin-top:14px}
+.check input{margin:3px 0 0; width:18px; height:18px; flex:none; accent-color:var(--gold)}
+.check label{font-size:13px; color:var(--ink-2); line-height:1.55}
+.save{font-family:"Jost",sans-serif; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  background:var(--ink); color:var(--paper); border:0; border-radius:5px; padding:14px 20px;
+  cursor:pointer; width:100%; min-height:50px; margin-top:20px}
+.save:disabled{opacity:.35; cursor:not-allowed}
+.ghost{font-family:"Jost",sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  background:transparent; color:var(--ink-3); border:1px solid var(--rule); border-radius:4px;
+  padding:8px 13px; cursor:pointer}
+.ghost:hover{color:var(--ink); border-color:var(--ink-3)}
+.ghost.danger:hover{color:var(--b); border-color:var(--b)}
+.ghost.key{color:var(--ink); border-color:var(--gold-2)}
+.ghost.key:hover{background:var(--gold); color:var(--card); border-color:var(--gold)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold); outline-offset:1px}
+
+.feed{display:flex; flex-direction:column; gap:1px; background:var(--rule-2);
+  border:1px solid var(--rule); border-radius:6px; overflow:hidden}
+.fitem{background:var(--card); padding:11px 14px; display:flex; gap:9px; align-items:baseline; flex-wrap:wrap}
+.fcode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--gold); flex:none}
+.fcode.bench{color:var(--ink-3)}
+.fwho{font-size:13px; font-weight:500; flex:none}
+.fdate{font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums; margin-left:auto}
+.pill{font-size:11.5px; padding:2px 7px; border-radius:3px; background:var(--chip); color:var(--chip-ink); white-space:nowrap}
+.pill.g{background:color-mix(in srgb,var(--g) 17%,transparent); color:var(--g)}
+.pill.w{background:color-mix(in srgb,var(--w) 17%,transparent); color:var(--w)}
+.pill.b{background:color-mix(in srgb,var(--b) 17%,transparent); color:var(--b)}
+.pill.ser{background:transparent; border:1px solid var(--rule); color:var(--ink-3)}
+.pill.alert{background:color-mix(in srgb,var(--b) 15%,transparent); color:var(--b)}
+.fnote{flex-basis:100%; font-size:12.5px; color:var(--ink-2)}
+.empty{color:var(--ink-3); font-size:13px; padding:17px 3px}
+
+/* 验证轮次 */
+.round{background:var(--card); border:1px solid var(--rule); border-left:3px solid var(--gold-2);
+  border-radius:6px; padding:15px 16px; margin-bottom:12px}
+.round.due{border-left-color:var(--b); background:color-mix(in srgb,var(--b) 5%,var(--card))}
+.round.done{border-left-color:var(--rule); opacity:.72}
+.rtop{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
+.rq{font-family:"Noto Serif SC","Songti SC",serif; font-size:14.5px; font-weight:600; flex:1; min-width:180px}
+.rdue{font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--ink-3)}
+.rdue.hot{color:var(--b); font-weight:500}
+.rmeta{font-size:12.5px; color:var(--ink-2); margin-top:8px}
+.rdecide{margin-top:12px; padding-top:11px; border-top:1px solid var(--rule-2)}
+.rverdict{font-size:13px; margin-top:9px; padding:9px 11px; background:var(--sunk); border-radius:4px; color:var(--ink-2)}
+.rverdict b{color:var(--ink)}
+.doctrine{font-size:12px; color:var(--ink-3); border-left:2px solid var(--rule); padding-left:11px; margin:0 0 15px; line-height:1.6}
+
+/* 产品库 / 型号卡 */
+.mrow{background:var(--card); border:1px solid var(--rule); border-radius:6px; padding:14px; margin-bottom:11px;
+  display:grid; grid-template-columns:132px 1fr; gap:15px}
+.mrow.bench{border-style:dashed}
+.mrow.noimg{border-left:2px solid var(--b)}
+.thumb{width:132px; height:132px; border-radius:5px; background:var(--sunk); border:1px dashed var(--rule);
+  overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer}
+.thumb.has{border-style:solid}
+.thumb img{width:100%; height:100%; object-fit:cover; display:block}
+.thumb span{font-size:11px; color:var(--ink-3); text-align:center; padding:6px; line-height:1.5}
+.thumb input[type=file]{position:absolute; inset:0; opacity:0; cursor:pointer}
+.mmeta{min-width:0}
+.mcode{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:16px; color:var(--gold); letter-spacing:.02em}
+.mcode.bench{color:var(--ink-3)}
+.mfull{font-size:12.5px; color:var(--ink-2); margin-top:3px}
+.mfull b{color:var(--ink); font-weight:500}
+.mparse{font-size:11.5px; color:var(--ink-3); margin-top:2px}
+.mfields{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:9px; margin-top:11px}
+.mfields .flabel{margin-bottom:4px}
+.mact{display:flex; gap:7px; margin-top:11px; flex-wrap:wrap; align-items:center;
+  padding-top:10px; border-top:1px solid var(--rule-2)}
+.mact .sep{color:var(--rule); margin:0 2px}
+
+/* 编码方案说明 */
+.scheme{background:var(--card); border:1px solid var(--rule); border-radius:6px; padding:16px; margin-bottom:13px}
+.scheme summary{font-family:"Noto Serif SC","Songti SC",serif; font-size:14.5px; font-weight:600; cursor:pointer; color:var(--ink)}
+.scheme[open] summary{margin-bottom:13px}
+.spec-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:clamp(17px,4.6vw,24px);
+  color:var(--gold); letter-spacing:.06em; margin:4px 0 14px; white-space:nowrap; overflow-x:auto}
+.sdl{display:grid; grid-template-columns:auto 1fr; gap:7px 15px; font-size:13px; margin:0}
+.sdl dt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--gold); white-space:nowrap}
+.sdl dd{margin:0; color:var(--ink-2)}
+.sdl dd b{color:var(--ink); font-weight:500}
+.srule{margin-top:14px; padding-top:13px; border-top:1px solid var(--rule-2); font-size:13px; color:var(--ink-2)}
+.srule p{margin:0 0 7px}
+.srule p:last-child{margin:0}
+.srule strong{color:var(--ink)}
+
+/* 汇总 */
+.scard{background:var(--card); border:1px solid var(--rule); border-left:2px solid var(--rule);
+  border-radius:6px; box-shadow:var(--shadow); padding:15px 16px; margin-bottom:13px}
+.scard.lead{border-left-color:var(--gold)}
+.scard.bench{border-style:dashed; border-left-style:solid; border-left-color:var(--ink-3)}
+.sctop{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:11px}
+.scname{font-family:"Noto Serif SC","Songti SC",serif; font-size:14.5px; font-weight:600}
+.scmeta{font-size:12.5px; color:var(--ink-3); margin-left:auto; font-variant-numeric:tabular-nums}
+.metrics{display:grid; grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); gap:1px;
+  background:var(--rule-2); border:1px solid var(--rule-2); border-radius:5px; overflow:hidden}
+.m{background:var(--sunk); padding:9px 10px}
+.mk{font-size:10.5px; color:var(--ink-3); margin-bottom:2px}
+.mv{font-size:15px; font-weight:500; font-variant-numeric:tabular-nums}
+.mv small{font-size:10.5px; color:var(--ink-3); font-weight:400}
+.bars{margin-top:11px}
+.barrow{display:flex; align-items:center; gap:9px; font-size:12px; margin-bottom:4px}
+.barrow b{min-width:52px; color:var(--ink-3); font-weight:400}
+.track{flex:1; height:8px; background:var(--rule-2); border-radius:2px; overflow:hidden; display:flex}
+.fg{background:var(--g)} .fw{background:var(--w)} .fb{background:var(--b)} .fn{background:var(--ink-3)}
+.barrow span{min-width:66px; text-align:right; color:var(--ink-2)}
+.quotes{margin-top:12px; padding-top:11px; border-top:1px solid var(--rule-2)}
+.q{font-size:13px; color:var(--ink-2); margin-bottom:6px; padding-left:11px; border-left:2px solid var(--rule)}
+.diag{margin-top:11px; padding-top:11px; border-top:1px solid var(--rule-2); font-size:12.5px; color:var(--ink-2); line-height:1.6}
+.diag strong{color:var(--ink)}
+
+#repwrap{margin-top:16px}
+#repcv{width:100%; height:auto; border:1px solid var(--rule); border-radius:6px; background:#fff; display:block}
+#repmsg{font-size:12.5px; color:var(--leaf); min-height:19px; margin-top:9px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:560px){ .mrow{grid-template-columns:1fr} .thumb{width:100%; height:200px} }
+</style>
+
+<div class="app">
+  <header>
+    <div class="mark" id="brandmark">纫荃<small>SEWN SEASONS</small></div>
+    <h1>感受测试台</h1>
+    <p class="dek">编码对内、全称对外，两者一一对应。局部改动有三条派生路径：加变体、升代、开新序号——不用新建，从原型号派生就行。每个型号都要有图。</p>
+    <p id="status">正在连接云端…</p>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-tab="lib">产品库</button>
+    <button role="tab" aria-selected="false" data-tab="log">记感受</button>
+    <button role="tab" aria-selected="false" data-tab="round">验证轮次</button>
+    <button role="tab" aria-selected="false" data-tab="sum">汇总</button>
+    <button role="tab" aria-selected="false" data-tab="report">图片报告</button>
+    <button role="tab" aria-selected="false" data-tab="cust">客户页</button>
+  </nav>
+
+  <!-- 产品库 -->
+  <section class="tab" id="tab-lib">
+    <details class="scheme" id="scheme">
+      <summary>编码方案</summary>
+      <div class="spec-code">FW&#8209;401A&#8209;II&nbsp;&nbsp;=&nbsp;&nbsp;FW · 4 · 01 · A · II</div>
+      <dl class="sdl">
+        <dt>FW</dt><dd><b>品类码</b>　两个字母。决定问什么、也是编码前缀。<b>永不变</b>。</dd>
+        <dt>4</dt><dd><b>档位</b>　一位数，由<b>材料等级</b>决定，不由价格或系列决定——所以它不会因为改定价而失效。1–3 基础／4–6 进阶／7–9 珍贵。</dd>
+        <dt>01</dt><dd><b>序号</b>　两位数。同档位内第几个开发项目。<b>面料组合变了就开新序号。</b></dd>
+        <dt>A</dt><dd><b>变体</b>　一个字母。同版型、同面料，只改填充克重／层数／颜色。厚款 A、薄款 B 是同一个序号的变体。</dd>
+        <dt>II</dt><dd><b>代</b>　罗马数字，一代不写。版型或工艺改良、规格叙事不变时升代。<b>新代是新型号，旧代不删</b>——像 R5 和 R5 Mark II 并存。</dd>
+      </dl>
+      <div class="srule">
+        <p><strong>一、编码是身份证，不是说明书。</strong>它要在剪第一刀时就能发出来——那一刻只知道品类和用了什么材料。所以编码只装这两样，其余全是字段。</p>
+        <p><strong>二、编码记录"它是什么"，不记录"它现在怎么样"。</strong>试验中／已搁置／已淘汰／已上线／已停产都是状态，都会变，都不进编码。<strong>是否上线是状态，不是身份。</strong></p>
+        <p><strong>三、绝不复用，绝不回收。</strong>淘汰的型号保留编码和全部记录，只改状态并写明原因。研发管理的价值大半在失败记录里。</p>
+        <p><strong>四、派生看"改了哪一层"。</strong>改「用什么」→ 新序号；改「用多少」→ 变体；改「怎么做」→ 升一代。硬判据：<strong>材料清单变了就是新序号</strong>，哪怕只换一种——所以羊毛絮片换驼绒是新序号，不是变体。</p>
+        <p><strong>五、一个型号一张图。无图即未登记。</strong></p>
+        <p style="margin-top:11px; padding-top:10px; border-top:1px solid var(--rule-2)">
+          <strong>系列不进编码</strong>（主纲第四节：产品会在系列之间生长）。<strong>对外全称</strong>只有上线后才有意义：<code>经年 · 眠足 厚款 · FW-401A</code>。顾客日常说「眠足 厚款」，详情页印全称，客服／售后／物流／对账一律用型号码——顾客说「我的 PIXMA」，客服说「TS8330」。<strong>对标品</strong>走 <code>FW-B01</code>，不占档位、不进系列、没有状态。</p>
+      </div>
+    </details>
+
+    <div class="card" style="padding:14px">
+      <div class="field">
+        <span class="flabel">品类</span>
+        <div class="opts" id="lib-cat"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="flabel">状态筛选</span>
+        <div class="opts" id="lib-state"></div>
+      </div>
+    </div>
+    <p class="hint" id="lib-warn"></p>
+    <div id="lib-list"></div>
+
+    <div class="card" style="padding:14px; margin-top:13px">
+      <div class="field">
+        <span class="flabel">新建型号 · 先选材料档位</span>
+        <p class="fsub">序号会自动取该档位的下一个，变体从 A 开始。</p>
+        <div class="opts" id="lib-grade"></div>
+      </div>
+      <div class="mact" style="border:0; padding:0; margin:0">
+        <button class="ghost key" id="lib-add">+ 新建自家型号</button>
+        <button class="ghost" id="lib-bench">+ 新建对标品</button>
+        <span class="sep">|</span>
+        <button class="ghost" id="lib-seed">载入脚套现有 8 组</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 记感受 -->
+  <section class="tab" id="tab-log" hidden>
+    <h2>记一条感受</h2>
+    <p class="hint">问法跟着<strong>品类</strong>走，在代码顶部 <code>CONFIG.categories</code> 里改。对标品用虚线框，问法完全一样——只有同一套问法，比较才成立。</p>
+    <div class="card">
+      <div class="field">
+        <span class="flabel">品类</span>
+        <div class="opts" id="log-cat"></div>
+      </div>
+      <div class="field">
+        <span class="flabel">型号</span>
+        <div class="opts" id="log-model"></div>
+      </div>
+      <div class="row" style="margin-bottom:17px">
+        <div><span class="flabel">测试人</span><input type="text" id="log-tester" placeholder="姓名或代号"></div>
+        <div><span class="flabel">日期</span><input type="date" id="log-date"></div>
+      </div>
+      <div id="log-dyn"></div>
+      <div class="field">
+        <span class="flabel">手感 1–5</span>
+        <div class="opts" id="log-feel"></div>
+      </div>
+      <div class="field">
+        <span class="flabel">看着值钱 1–5</span>
+        <div class="opts" id="log-look"></div>
+      </div>
+      <div class="field">
+        <span class="flabel">原话</span>
+        <p class="fsub">越具体越有用。哪里硌、哪里勒、比想象的好还是差。</p>
+        <textarea id="log-words" placeholder="「脚趾那块有点顶」「洗完手感变硬了」"></textarea>
+        <div class="check">
+          <input type="checkbox" id="log-quotable">
+          <label for="log-quotable">这句可以匿名引用到图片报告和对外内容里</label>
+        </div>
+      </div>
+      <button class="save" id="log-save" disabled>保存</button>
+    </div>
+    <h2>最近的记录</h2>
+    <p class="hint" id="log-count"></p>
+    <div class="feed" id="log-feed"></div>
+  </section>
+
+  <!-- 验证轮次 -->
+  <section class="tab" id="tab-round" hidden>
+    <h2>验证轮次</h2>
+    <p class="doctrine">「每一轮验证须设定完成日期，到期必须出结论：做、不做、或再验一轮并写明再验什么。」<br>
+      「是否存在值得付费的缺口最终由真实付费验证，不由主理人的个人体验单独判定。」<br>
+      —— 主纲 v1.2，第六节</p>
+    <p class="hint">到期没有结论的轮次会一直红着，不会自己消失。这是<strong>当判断者与被判断者是同一人时</strong>那个外部约束的位置。</p>
+    <div class="card">
+      <div class="field">
+        <span class="flabel">品类</span>
+        <div class="opts" id="round-cat"></div>
+      </div>
+      <div class="field">
+        <span class="flabel">这一轮要回答什么</span>
+        <p class="fsub">写成一个能被"是/否"回答的问题，不要写成"继续研究"。</p>
+        <textarea id="round-q" placeholder="59.9 元头部产品是否已经是让人充分满意的一百分产品？"></textarea>
+      </div>
+      <div class="row">
+        <div><span class="flabel">完成日期</span><input type="date" id="round-due"></div>
+        <div><span class="flabel">已有真实付费笔数</span><input type="number" id="round-paid" step="1" value="0"></div>
+      </div>
+      <button class="save" id="round-save" disabled>开一轮</button>
+    </div>
+    <div id="round-list"></div>
+  </section>
+
+  <!-- 汇总 -->
+  <section class="tab" id="tab-sum" hidden>
+    <h2>汇总</h2>
+    <p class="hint">按品类看。自家产品和对标品排在一起——如果对标品的主指标不输给你，按主纲第六节，这一款就不该做。</p>
+    <div class="card" style="padding:14px">
+      <div class="field">
+        <span class="flabel">品类</span>
+        <div class="opts" id="sum-cat"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="flabel">系列（可选筛选）</span>
+        <div class="opts" id="sum-ser"></div>
+      </div>
+    </div>
+    <div id="sum-list"></div>
+  </section>
+
+  <!-- 图片报告 -->
+  <section class="tab" id="tab-report" hidden>
+    <h2>图片报告</h2>
+    <p class="hint">1080 宽长图，印对外全称、产品图、感受分布和可引用原话。<strong>只印勾了「可引用」的原话；不给对标品出报告</strong>——把别人的产品数据印进自己的宣传，是《广告法》里贬低同行和引证他人数据的红线。</p>
+    <div class="card" style="padding:14px">
+      <div class="field">
+        <span class="flabel">品类</span>
+        <div class="opts" id="rep-cat"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="flabel">型号（仅自家）</span>
+        <div class="opts" id="rep-model"></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:9px; flex-wrap:wrap">
+      <button class="ghost" id="rep-make">生成长图</button>
+      <button class="ghost" id="rep-save" hidden>保存 / 下载</button>
+    </div>
+    <p id="repmsg"></p>
+    <div id="repwrap"><canvas id="repcv" width="1080" height="200"></canvas></div>
+  </section>
+
+  <!-- 客户页 -->
+  <section class="tab" id="tab-cust" hidden>
+    <h2>生成客户页</h2>
+    <p class="hint"><strong>产品库是唯一数据源，客户页是从它生成的产物——不是你要维护的第二处。</strong>改完型号、改完状态，回来点一次导出，拿到一个完整的 html 文件，扔到你自己的空间或者让我发成链接。客户那边只看到产品名，但他复制回来的那段文字里带着型号码。</p>
+    <div class="card" style="padding:14px">
+      <div class="field">
+        <span class="flabel">品类</span>
+        <div class="opts" id="cust-cat"></div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <span class="flabel">会写进客户页的型号</span>
+        <p class="fsub">只收「已上线」和「已停产」——试验中的型号不出现在客户面前。已停产会标注，让老客户还能选到自己那双。</p>
+        <div id="cust-list"></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:9px; flex-wrap:wrap">
+      <button class="ghost key" id="cust-make">生成并下载客户页</button>
+    </div>
+    <p id="custmsg"></p>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ==========================================================
+     CONFIG —— 要改的东西都在这一块
+
+     series      四大系列，按【职责】划分（主纲第三节）。不进编码——
+                 产品会在系列之间流动（第四节），编码必须稳定。
+     categories  品类，决定【问什么】，也决定【编码前缀】。
+     grades      档位，由【材料等级】决定，不由价格或系列决定。
+     ========================================================== */
+  var CONFIG = {
+    brand:"纫荃", latin:"SEWN SEASONS",
+
+    series:[
+      {code:"JN", name:"经年", en:"FOR KEEPS",            duty:"品牌长久 · 主干"},
+      {code:"CW", name:"采薇", en:"IN SEASON",            duty:"时间变化"},
+      {code:"SX", name:"生香", en:"MISS SUNSHINE",        duty:"美、快乐与自由试验"},
+      {code:"WS", name:"无双", en:"WONDERFUL, WONDERFUL", duty:"最高体验与珍贵材料"}
+    ],
+
+    grades:[
+      {v:1,t:"1 基础"},{v:2,t:"2 基础"},{v:3,t:"3 基础"},
+      {v:4,t:"4 进阶"},{v:5,t:"5 进阶"},{v:6,t:"6 进阶"},
+      {v:7,t:"7 珍贵"},{v:8,t:"8 珍贵"},{v:9,t:"9 珍贵"}
+    ],
+    gradeTier:function(g){ return g<=3?"基础":g<=6?"进阶":"珍贵"; },
+
+    /* 状态：会变，不进编码。淘汰不删记录，只改状态并写原因。 */
+    states:[
+      {v:"test",    t:"试验中", tone:"w", open:true},
+      {v:"shelved", t:"已搁置", tone:"",  open:false},
+      {v:"dropped", t:"已淘汰", tone:"b", open:false},
+      {v:"live",    t:"已上线", tone:"g", open:false},
+      {v:"retired", t:"已停产", tone:"",  open:false}
+    ],
+    /* 同时"试验中"的型号上限。一个人一台缝纫机，手是瓶颈，不是记录。
+       四大品类展开后，这个数比任何记录都重要。 */
+    wipLimit:8,
+
+    categories:[
+      { code:"FW", name:"睡眠脚套", unit:"双", pname:"眠足",
+        rankLabel:"保暖档",
+        /* 客户页的推荐逻辑：哪个字段表示冷热，哪些值算热／算冷。
+           有这一段，客户页就能按保暖档「往下推一档／往上推一档」，
+           不用把型号名字写死。没有这一段的品类只出通用结果。 */
+        match:{ field:"warmth", hot:["hot","warm"], cold:["cold"],
+                stayField:"stayed", kicked:"kicked", slipped:"slipped",
+                dampField:"damp", wet:["wet"] },
+        fields:[
+          { key:"warmth", label:"温度", sub:"半夜和清早，脚是什么感觉", options:[
+            {v:"cold",t:"还是凉的",tone:"w"},{v:"ok",t:"刚好",tone:"g"},
+            {v:"warm",t:"有点热",tone:"w"},{v:"hot",t:"热得睡不好",tone:"b"}]},
+          { key:"stayed", label:"早上", sub:"醒来还在脚上吗。踢掉和滑落要分开——前者多半是太热，后者才是版型", options:[
+            {v:"on",t:"还在",tone:"g"},{v:"kicked",t:"我踢掉的",tone:"b"},{v:"slipped",t:"滑下去了",tone:"w"}]},
+          { key:"damp", label:"干潮", sub:"脱下来里面是干的吗", options:[
+            {v:"dry",t:"干爽",tone:"g"},{v:"slight",t:"有点潮",tone:"w"},{v:"wet",t:"明显潮",tone:"b"}]},
+          { key:"wrap", label:"包裹", sub:"脚踝那一圈的贴合", options:[
+            {v:"good",t:"刚好裹住",tone:"g"},{v:"loose",t:"松",tone:"w"},{v:"tight",t:"勒",tone:"b"}]}
+        ],
+        headline:{field:"stayed", good:"on", label:"在脚上率"} },
+
+      { code:"BT", name:"佩香腰带", unit:"条", pname:"", rankLabel:"香气浓度档",
+        fields:[
+          { key:"warmth", label:"温感", sub:"贴着腰的感觉", options:[
+            {v:"cold",t:"没感觉",tone:"w"},{v:"ok",t:"温温的",tone:"g"},{v:"hot",t:"过热",tone:"b"}]},
+          { key:"scent", label:"香气", sub:"第一天和第七天分别记一次", options:[
+            {v:"weak",t:"太淡",tone:"w"},{v:"ok",t:"合适",tone:"g"},{v:"heavy",t:"太冲",tone:"b"}]},
+          { key:"wear", label:"佩戴", sub:"坐下、弯腰、睡觉时", options:[
+            {v:"good",t:"不碍事",tone:"g"},{v:"slip",t:"会移位",tone:"w"},{v:"press",t:"硌或勒",tone:"b"}]}
+        ],
+        headline:{field:"scent", good:"ok", label:"香气合适率"} },
+
+      { code:"XN", name:"（第三品类 · 待定）", unit:"件", pname:"",
+        fields:[{ key:"overall", label:"整体感受", sub:"先占位，按这个品类真正要问的改掉", options:[
+          {v:"good",t:"很好",tone:"g"},{v:"ok",t:"还行",tone:"w"},{v:"bad",t:"不太好",tone:"b"}]}],
+        headline:{field:"overall", good:"good", label:"说好的比例"} },
+
+      { code:"AC", name:"（第四品类 · 待定）", unit:"件", pname:"",
+        fields:[{ key:"overall", label:"整体感受", sub:"先占位", options:[
+          {v:"good",t:"很好",tone:"g"},{v:"ok",t:"还行",tone:"w"},{v:"bad",t:"不太好",tone:"b"}]}],
+        headline:{field:"overall", good:"good", label:"说好的比例"} }
+    ],
+
+    washes:[{v:"0",t:"还没洗",tone:""},{v:"1",t:"一两次",tone:""},{v:"3",t:"三到五次",tone:""},{v:"6",t:"六次以上",tone:""}],
+    change:[{v:"none",t:"没变化",tone:"g"},{v:"hard",t:"变硬了",tone:"w"},{v:"thin",t:"变薄了",tone:"w"},
+            {v:"clump",t:"里面结块",tone:"b"},{v:"shrink",t:"缩了",tone:"b"},{v:"fuzz",t:"起球掉毛",tone:"w"},{v:"other",t:"别的变化",tone:"w"}],
+
+    /* 现有 8 组 → 新编码。同版型同面料只改克重的，归成同一序号的变体。 */
+    seedFW:[
+      {grade:1,seq:1,variant:"A",gen:1,series:"JN",vname:"", spec:"外人棉 / 里人棉 · 纯棉絮片 120g×2", cost:34.02, alias:"人棉双层 · 纯棉 240g"},
+      {grade:1,seq:2,variant:"A",gen:1,series:"JN",vname:"", spec:"外德绒 / 里德绒 · 纯棉絮片 120g×2", cost:39.89, alias:"德绒双层 · 纯棉 240g"},
+      {grade:4,seq:1,variant:"A",gen:1,series:"JN",vname:"厚款", spec:"外天丝羊毛 / 里天丝羊毛 · 羊毛絮片 120g×2", cost:46.98, alias:"天丝羊毛双层 · 羊毛 240g"},
+      {grade:4,seq:1,variant:"B",gen:1,series:"JN",vname:"薄款", spec:"外天丝羊毛 / 里天丝羊毛 · 羊毛絮片 80g×2", cost:44.72, alias:"天丝羊毛双层 · 羊毛 160g"},
+      {grade:4,seq:1,variant:"C",gen:1,series:"JN",vname:"单层薄款", spec:"外天丝羊毛 / 里天丝羊毛 · 羊毛絮片 120g×1（只绗外层）", cost:43.60, alias:"天丝羊毛双层 · 羊毛 120g 单层"},
+      {grade:4,seq:2,variant:"A",gen:1,series:"JN",vname:"绒感款", spec:"外天丝羊毛 / 里德绒 · 羊毛絮片 120g×2", cost:45.13, alias:"外天丝羊毛 / 里德绒 · 羊毛 240g"},
+      {grade:7,seq:1,variant:"A",gen:1,series:"WS",vname:"真丝里", spec:"外天丝羊毛 / 里真丝 · 羊毛絮片 120g×2", cost:79.62, alias:"外天丝羊毛 / 里真丝 · 羊毛 240g"},
+      {grade:7,seq:2,variant:"A",gen:1,series:"WS",vname:"驼绒", spec:"外天丝羊毛 / 里天丝羊毛 · 驼绒絮片 120g×2", cost:65.33, alias:"天丝羊毛双层 · 驼绒 240g"}
+    ]
+  };
+  /* ===================== CONFIG 结束 ===================== */
+
+  var LS="renquan-feellab-v3";
+  var db=null, assets=null, downloads=null;
+  var state={models:[], records:[], rounds:[]};
+  var draft={}, newGrade=4;
+  var sel={log:"FW", sum:"FW", rep:"FW", lib:"FW", round:"FW", cust:"FW", sumSer:"", libState:""};
+  var repModel=null, repBlob=null;
+
+  var ROMAN=["","","II","III","IV","V","VI","VII","VIII","IX","X"];
+  function roman(n){ return ROMAN[n]||("x"+n); }
+
+  function C(code){ for(var i=0;i<CONFIG.categories.length;i++) if(CONFIG.categories[i].code===code) return CONFIG.categories[i]; return CONFIG.categories[0]; }
+  function SER(code){ for(var i=0;i<CONFIG.series.length;i++) if(CONFIG.series[i].code===code) return CONFIG.series[i]; return null; }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function days(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000); }
+  function num(v){ var n=parseFloat(v); return isFinite(n)?n:null; }
+  function optT(list,v){ for(var i=0;i<list.length;i++) if(list[i].v===v) return list[i]; return null; }
+
+  /* ---------- 编码与全称 ---------- */
+  function buildCode(m){
+    if(m.kind==="bench") return m.cat+"-B"+String(m.seq||1).padStart(2,"0");
+    var c=m.cat+"-"+m.grade+String(m.seq).padStart(2,"0")+(m.variant||"A");
+    if((m.gen||1)>1) c+="-"+roman(m.gen);
+    return c;
+  }
+  function ST(v){ for(var i=0;i<CONFIG.states.length;i++) if(CONFIG.states[i].v===v) return CONFIG.states[i]; return CONFIG.states[0]; }
+  function stateOf(m){ return m.kind==="bench" ? null : ST(m.status||"test"); }
+  function isLive(m){ return m.status==="live"||m.status==="retired"; }
+  function publicName(m){
+    if(m.kind==="bench") return (m.name?m.name+" ":"")+(m.alias||m.code);
+    var s=SER(m.series), c=C(m.cat);
+    var mid=[m.pname||c.pname||"", m.vname].filter(Boolean).join(" ");
+    if((m.gen||1)>1) mid+=(mid?" ":"")+roman(m.gen)+"代";
+    if(!isLive(m)) return (mid? mid+" · " : "")+m.code+"　（未上线，还没有对外全称）";
+    return [s?s.name:"", mid, m.code].filter(Boolean).join(" · ");
+  }
+  function wipCount(cat){
+    return state.models.filter(function(m){
+      return (m.kind||"own")==="own" && (!cat||m.cat===cat) && ST(m.status||"test").open;
+    }).length;
+  }
+  function parseHint(m){
+    if(m.kind==="bench") return "对标品 · 不占档位、不进系列";
+    return "品类 "+m.cat+"　档位 "+m.grade+" "+CONFIG.gradeTier(m.grade)+
+           "　序号 "+String(m.seq).padStart(2,"0")+"　变体 "+(m.variant||"A")+
+           "　"+((m.gen||1)>1?roman(m.gen)+" 代":"一代");
+  }
+  function models(cat,kind){ return state.models.filter(function(m){ return m.cat===cat && (!kind||(m.kind||"own")===kind); })
+    .sort(function(x,y){ return String(x.code).localeCompare(String(y.code)); }); }
+  function model(code){ for(var i=0;i<state.models.length;i++) if(state.models[i].code===code) return state.models[i]; return null; }
+  function recsOf(code){ return state.records.filter(function(r){return r.code===code;}); }
+  function isBench(m){ return m && m.kind==="bench"; }
+
+  function setStatus(m,warn){ var e=document.getElementById("status"); e.textContent=m; e.className=warn?"warn":""; }
+  function mirror(){ try{ localStorage.setItem(LS,JSON.stringify(state)); }catch(e){} }
+  function fromLocal(){ try{ var r=localStorage.getItem(LS); if(!r) return; var o=JSON.parse(r);
+    ["models","records","rounds"].forEach(function(k){ if(Array.isArray(o[k])) state[k]=o[k]; }); }catch(e){} }
+
+  function put(coll,id,body){
+    state[coll]=state[coll].filter(function(x){return x.id!==id;}).concat([Object.assign({id:id},body)]);
+    mirror(); render();
+    if(db) db.doc(coll+"/"+id).set(body).catch(function(e){ setStatus("这条没同步到云端（"+e.code+"），本机已存。",true); });
+  }
+  function drop(coll,id){
+    state[coll]=state[coll].filter(function(x){return x.id!==id;});
+    mirror(); render();
+    if(db) db.doc(coll+"/"+id).delete().catch(function(){});
+  }
+
+  /* ---------- chips ---------- */
+  function chips(el,list,cur,pick,extraCls){
+    el.innerHTML=list.map(function(o){
+      if(o.group) return '<span class="grouplab">'+esc(o.group)+'</span>';
+      return '<button class="opt sm'+(extraCls?" "+extraCls:"")+(o.cls?" "+o.cls:"")+(o.tone?" "+o.tone:"")+
+        '" data-v="'+esc(o.v)+'" aria-pressed="'+(String(o.v)===String(cur)?"true":"false")+'">'+esc(o.t)+'</button>';
+    }).join("") || '<span class="empty" style="padding:4px">（空）</span>';
+    Array.prototype.forEach.call(el.querySelectorAll(".opt"),function(b){
+      b.addEventListener("click",function(){ pick(b.getAttribute("data-v")); });
+    });
+  }
+  function catChips(el,which){
+    chips(el,CONFIG.categories.map(function(c){return {v:c.code,t:c.code+" "+c.name};}),sel[which],function(v){
+      sel[which]=v;
+      if(which==="log") draft={};
+      if(which==="rep") repModel=null;
+      render();
+    });
+  }
+  function modelChips(el,cat,cur,pick,ownOnly){
+    function lab(m){ return m.code+(m.vname?" "+m.vname:(m.alias?" "+m.alias.slice(0,10):"")); }
+    var own=models(cat,"own").map(function(m){ return {v:m.code, t:lab(m), cls:m.imageId?"":""}; });
+    var bench=ownOnly?[]:models(cat,"bench").map(function(m){ return {v:m.code, t:lab(m), cls:"bench"}; });
+    var list=[];
+    if(own.length){ list.push({group:"自家"}); list=list.concat(own); }
+    if(bench.length){ list.push({group:"对标品"}); list=list.concat(bench); }
+    chips(el,list,cur,pick,"code");
+  }
+
+  /* ---------- 产品库 ---------- */
+  function renderLib(){
+    catChips(document.getElementById("lib-cat"),"lib");
+    chips(document.getElementById("lib-grade"),CONFIG.grades.map(function(g){return {v:g.v,t:g.t};}),newGrade,function(v){
+      newGrade=parseInt(v,10); render();
+    });
+    chips(document.getElementById("lib-state"),
+      [{v:"",t:"全部"},{v:"__open",t:"只看试验中"}].concat(CONFIG.states.map(function(s){return {v:s.v,t:s.t,tone:s.tone};})),
+      sel.libState,function(v){ sel.libState=v; render(); });
+
+    var c=C(sel.lib), all=models(c.code), host=document.getElementById("lib-list");
+    var list=all.filter(function(m){
+      if(!sel.libState) return true;
+      if(isBench(m)) return sel.libState===""||sel.libState==="__open";
+      if(sel.libState==="__open") return ST(m.status||"test").open;
+      return (m.status||"test")===sel.libState;
+    });
+    document.getElementById("lib-seed").hidden = (c.code!=="FW");
+
+    var noimg=all.filter(function(m){ return !m.imageId; }).length;
+    var wipC=wipCount(c.code), wipAll=wipCount(null), lim=CONFIG.wipLimit;
+    var bits=[];
+    bits.push('<span class="pill'+(wipAll>lim?" alert":"")+'">同时在试 '+wipAll+' / 上限 '+lim+'</span>');
+    if(wipAll>lim) bits.push('已经超了。你一个人一台缝纫机，手是瓶颈——不是记录不够，是同时开的太多。先给几个型号按「已搁置」，别硬扛。');
+    else if(noimg) bits.push('<span class="pill alert">'+noimg+' 个型号缺图</span>　无图即未登记。局部改动的变体，光看规格文字三个月后你自己也认不出来。');
+    else if(all.length) bits.push('本品类 '+all.length+' 个型号，'+wipC+' 个在试，都有图。');
+    document.getElementById("lib-warn").innerHTML = bits.join('　');
+
+    if(!list.length){ host.innerHTML='<div class="empty">'+(all.length?'这个状态下没有型号。':'这个品类还没有型号。在下面选档位、新建。')+'</div>'; return; }
+
+    host.innerHTML=list.map(function(m){
+      var bench=isBench(m);
+      var img=m.imageId
+        ? '<img src="/_blob/'+esc(m.imageId)+'" alt="'+esc(m.code)+'">'
+        : '<span>点这里<br>加图片<br><b style="color:var(--b)">缺图</b></span>';
+      var serOpts=CONFIG.series.map(function(s){
+        return '<option value="'+s.code+'"'+(m.series===s.code?' selected':'')+'>'+esc(s.name+" "+s.en)+'</option>';
+      }).join("");
+      var recN=recsOf(m.code).length, st=stateOf(m);
+      var stOpts=CONFIG.states.map(function(s){
+        return '<option value="'+s.v+'"'+((m.status||"test")===s.v?' selected':'')+'>'+esc(s.t)+'</option>';
+      }).join("");
+      return '<div class="mrow'+(bench?" bench":"")+(m.imageId?"":" noimg")+'">'+
+        '<label class="thumb'+(m.imageId?" has":"")+'">'+img+'<input type="file" accept="image/*" data-img="'+esc(m.code)+'"></label>'+
+        '<div class="mmeta">'+
+          '<div class="mcode'+(bench?" bench":"")+'">'+esc(m.code)+
+            (st?' <span class="pill '+(st.tone||"")+'" style="font-size:11px;vertical-align:2px">'+esc(st.t)+'</span>':'')+'</div>'+
+          '<div class="mfull"><b>'+esc(publicName(m))+'</b></div>'+
+          '<div class="mparse">'+esc(parseHint(m))+'　'+recN+' 条记录</div>'+
+          '<div class="mfields">'+
+            (bench?'':'<div><span class="flabel">状态</span><select data-mc="'+esc(m.code)+'" data-mf="status" aria-label="状态">'+stOpts+'</select></div>')+
+            (bench?'':fld(m.code,"rank",(c.rankLabel||"档位序")+" 1–5",m.rank==null?"":m.rank,"number"))+
+            (bench?'':fld(m.code,"pname","产品名",m.pname||"","text"))+
+            (bench?'':fld(m.code,"vname","变体名",m.vname||"","text"))+
+            fld(m.code,"alias",bench?"品牌 / 来源":"内部别名",m.alias,"text")+
+            fld(m.code,"cost",bench?"售价 元":"总成本 元",m.cost,"number")+
+            (bench?'':'<div><span class="flabel">系列（可改）</span><select data-mc="'+esc(m.code)+'" data-mf="series" aria-label="系列">'+serOpts+'</select></div>')+
+          '</div>'+
+          '<div style="margin-top:9px">'+fld(m.code,"spec",bench?"观察到的规格":"规格",m.spec,"text")+'</div>'+
+          ((!bench&&(m.status==="dropped"||m.status==="shelved"))
+            ? '<div style="margin-top:9px">'+fld(m.code,"why",m.status==="dropped"?"淘汰原因（必须写——这是档案里最值钱的部分）":"搁置原因",m.why||"","text")+'</div>' : '')+
+          '<div class="mact">'+
+            (bench?'':'<button class="ghost key" data-derive="variant" data-code="'+esc(m.code)+'">+ 加变体</button>'+
+                      '<button class="ghost key" data-derive="gen" data-code="'+esc(m.code)+'">+ 升一代</button>'+
+                      '<button class="ghost" data-derive="seq" data-code="'+esc(m.code)+'">+ 同档新序号</button><span class="sep">|</span>')+
+            (m.imageId?'<button class="ghost" data-rmimg="'+esc(m.code)+'">移除图片</button>':'')+
+            '<button class="ghost danger" data-del="models" data-id="'+esc(m.id)+'">删除</button>'+
+          '</div>'+
+        '</div></div>';
+    }).join("");
+
+    Array.prototype.forEach.call(host.querySelectorAll("[data-mc]"),function(inp){
+      inp.addEventListener("change",function(){
+        var m=model(inp.getAttribute("data-mc")); if(!m) return;
+        var f=inp.getAttribute("data-mf"), body=Object.assign({},m); delete body.id;
+        body[f] = (f==="cost"||f==="rank") ? (inp.value===""?null:num(inp.value)) : inp.value;
+        put("models",m.id,body);
+      });
+    });
+    Array.prototype.forEach.call(host.querySelectorAll("[data-img]"),function(inp){
+      inp.addEventListener("change",function(){ uploadImage(inp.getAttribute("data-img"),inp.files&&inp.files[0]); });
+    });
+    Array.prototype.forEach.call(host.querySelectorAll("[data-rmimg]"),function(b){
+      b.addEventListener("click",function(){
+        var m=model(b.getAttribute("data-rmimg")); if(!m) return;
+        var body=Object.assign({},m); delete body.id; body.imageId=null; put("models",m.id,body);
+      });
+    });
+    Array.prototype.forEach.call(host.querySelectorAll("[data-derive]"),function(b){
+      b.addEventListener("click",function(){ derive(b.getAttribute("data-code"),b.getAttribute("data-derive")); });
+    });
+  }
+  function fld(code,f,label,val,type){
+    return '<div><span class="flabel">'+esc(label)+'</span><input type="'+type+'"'+(type==="number"?' step="0.01"':'')+
+      ' data-mc="'+esc(code)+'" data-mf="'+esc(f)+'" value="'+esc(val==null?"":val)+'" aria-label="'+esc(label)+'"></div>';
+  }
+
+  /* ---------- 新建与派生 ---------- */
+  function taken(code){ return !!model(code); }
+  function nextSeq(cat,grade){
+    var max=0;
+    models(cat,"own").forEach(function(m){ if(m.grade===grade && m.seq>max) max=m.seq; });
+    return max+1;
+  }
+  function nextVariant(cat,grade,seq){
+    var used={};
+    models(cat,"own").forEach(function(m){ if(m.grade===grade&&m.seq===seq) used[m.variant||"A"]=1; });
+    for(var i=0;i<26;i++){ var L=String.fromCharCode(65+i); if(!used[L]) return L; }
+    return "Z";
+  }
+  function nextBenchSeq(cat){
+    var max=0; models(cat,"bench").forEach(function(m){ if((m.seq||0)>max) max=m.seq; });
+    return max+1;
+  }
+  function create(body){
+    body.code=buildCode(body);
+    if(taken(body.code)){ setStatus("编码 "+body.code+" 已存在，没有新建。",true); return null; }
+    put("models",body.code,body);
+    return body.code;
+  }
+  function addOwn(cat,grade){
+    return create({cat:cat, kind:"own", grade:grade, seq:nextSeq(cat,grade), variant:"A", gen:1,
+      status:"test", why:"", rank:3, series:CONFIG.series[0].code, pname:C(cat).pname||"",
+      vname:"", alias:"", spec:"", cost:null, imageId:null});
+  }
+  function addBench(cat){
+    return create({cat:cat, kind:"bench", seq:nextBenchSeq(cat), series:null,
+      pname:"", vname:"", alias:"", name:"", spec:"", cost:null, imageId:null});
+  }
+  function derive(code,how){
+    var m=model(code); if(!m||isBench(m)) return;
+    var b=Object.assign({},m); delete b.id; delete b.code;
+    b.imageId=null;                     // 新型号必须自己有图
+    b.status="test"; b.why="";           // 派生出来的一律回到试验中
+    if(how==="variant"){
+      b.variant=nextVariant(m.cat,m.grade,m.seq);
+      b.vname=""; b.spec=m.spec;
+      setStatus("已从 "+code+" 加变体：同版型同面料，只改填充或颜色。记得改规格、改变体名、加图。");
+    } else if(how==="gen"){
+      b.gen=(m.gen||1)+1;
+      setStatus("已从 "+code+" 升一代：版型或工艺改良，规格叙事不变。旧代保留，像 R5 和 R5 Mark II 并存。");
+    } else {
+      b.seq=nextSeq(m.cat,m.grade); b.variant="A"; b.gen=1; b.vname=""; b.spec="";
+      setStatus("已在档位 "+m.grade+" 开新序号：面料组合变了才用这条。");
+    }
+    var nc=create(b);
+    if(nc) sel.lib=m.cat;
+  }
+  function uploadImage(code,file){
+    if(!file) return;
+    var m=model(code); if(!m) return;
+    if(!assets){ setStatus("这个视图不能上传图片（云端未启用）。",true); return; }
+    setStatus("正在上传 "+code+" 的图片…");
+    assets.upload(file).then(function(res){
+      var body=Object.assign({},m); delete body.id; body.imageId=res.id;
+      put("models",m.id,body); setStatus(code+" 的图片已上传。");
+    }).catch(function(e){ setStatus("图片上传失败（"+e.code+"）。",true); });
+  }
+
+  /* ---------- 记感受 ---------- */
+  function renderLog(){
+    var c=C(sel.log);
+    catChips(document.getElementById("log-cat"),"log");
+    modelChips(document.getElementById("log-model"),c.code,draft.code,function(v){ draft.code=v; render(); });
+
+    var host=document.getElementById("log-dyn"), html="";
+    c.fields.forEach(function(f){
+      html+='<div class="field"><span class="flabel">'+esc(f.label)+'</span>'+
+        (f.sub?'<p class="fsub">'+esc(f.sub)+'</p>':'')+
+        '<div class="opts" data-dyn="'+esc(f.key)+'"></div></div>';
+    });
+    html+='<div class="field"><span class="flabel">洗过几次</span><div class="opts" data-dyn="__washes"></div></div>';
+    if(draft.__washes&&draft.__washes!=="0")
+      html+='<div class="field"><span class="flabel">洗过之后</span><div class="opts" data-dyn="__change"></div></div>';
+    host.innerHTML=html;
+    c.fields.forEach(function(f){
+      chips(host.querySelector('[data-dyn="'+f.key+'"]'),f.options,draft[f.key],function(v){ draft[f.key]=v; render(); });
+    });
+    chips(host.querySelector('[data-dyn="__washes"]'),CONFIG.washes,draft.__washes,function(v){ draft.__washes=v; if(v==="0") delete draft.__change; render(); });
+    var ch=host.querySelector('[data-dyn="__change"]');
+    if(ch) chips(ch,CONFIG.change,draft.__change,function(v){ draft.__change=v; render(); });
+
+    var sc=[1,2,3,4,5].map(function(n){return {v:String(n),t:String(n)};});
+    chips(document.getElementById("log-feel"),sc,draft.feel,function(v){ draft.feel=v; render(); });
+    chips(document.getElementById("log-look"),sc,draft.look,function(v){ draft.look=v; render(); });
+
+    document.getElementById("log-save").disabled =
+      !(draft.code && c.fields.every(function(f){ return draft[f.key]; }) && draft.__washes);
+  }
+  function saveLog(){
+    var c=C(sel.log), vals={};
+    c.fields.forEach(function(f){ vals[f.key]=draft[f.key]; });
+    put("records",uid(),{ code:draft.code, cat:c.code, date:document.getElementById("log-date").value||today(),
+      tester:document.getElementById("log-tester").value.trim(), values:vals,
+      washes:draft.__washes, change:draft.__change||null,
+      feel:draft.feel?parseInt(draft.feel,10):null, look:draft.look?parseInt(draft.look,10):null,
+      words:document.getElementById("log-words").value.trim(),
+      quotable:document.getElementById("log-quotable").checked });
+    draft={code:draft.code};
+    document.getElementById("log-words").value="";
+    document.getElementById("log-quotable").checked=false;
+    render();
+    setStatus(db?"已保存到云端。":"已保存到本机。",!db);
+  }
+  function renderFeed(){
+    var rows=state.records.slice().sort(function(x,y){ return String(y.date).localeCompare(String(x.date)); }).slice(0,40);
+    document.getElementById("log-count").textContent = state.records.length? ("共 "+state.records.length+" 条，显示最近 "+rows.length+" 条") : "";
+    var el=document.getElementById("log-feed");
+    if(!rows.length){ el.innerHTML='<div class="fitem"><span class="empty">还没有记录。</span></div>'; return; }
+    el.innerHTML=rows.map(function(r){
+      var c=C(r.cat), m=model(r.code), pills="";
+      c.fields.forEach(function(f){ var o=optT(f.options,(r.values||{})[f.key]); if(o) pills+=pill(o.t,o.tone); });
+      var wo=optT(CONFIG.washes,r.washes), co=r.change?optT(CONFIG.change,r.change):null;
+      if(wo&&r.washes!=="0") pills+=pill("洗"+wo.t,"");
+      if(co) pills+=pill(co.t,co.tone);
+      return '<div class="fitem"><span class="fcode'+(isBench(m)?" bench":"")+'">'+esc(r.code)+'</span>'+
+        '<span class="fwho">'+esc(r.tester||"未署名")+'</span>'+pills+
+        '<span class="fdate">'+esc(String(r.date).slice(5))+'</span>'+
+        '<button class="ghost danger" data-del="records" data-id="'+esc(r.id)+'" style="padding:3px 8px;font-size:10px">删</button>'+
+        (r.words?'<span class="fnote">'+(r.quotable?'<span class="pill g" style="margin-right:6px">可引用</span>':'')+esc(r.words)+'</span>':'')+'</div>';
+    }).join("");
+  }
+  function pill(t,tone){ return t?'<span class="pill '+(tone||"")+'">'+esc(t)+'</span>':''; }
+
+  /* ---------- 验证轮次 ---------- */
+  function renderRoundForm(){
+    catChips(document.getElementById("round-cat"),"round");
+    document.getElementById("round-save").disabled =
+      !(document.getElementById("round-q").value.trim() && document.getElementById("round-due").value);
+  }
+  function saveRound(){
+    put("rounds",uid(),{ cat:sel.round, q:document.getElementById("round-q").value.trim(),
+      due:document.getElementById("round-due").value, opened:today(),
+      paid:parseInt(document.getElementById("round-paid").value,10)||0, conclusion:null });
+    document.getElementById("round-q").value="";
+    document.getElementById("round-due").value="";
+    render();
+  }
+  function renderRounds(){
+    var el=document.getElementById("round-list");
+    var list=state.rounds.slice().sort(function(a,b){
+      if(!!a.conclusion!==!!b.conclusion) return a.conclusion?1:-1;
+      return String(a.due).localeCompare(String(b.due));
+    });
+    if(!list.length){ el.innerHTML='<div class="empty">还没有开过轮次。第一轮大概是：59.9 元的头部产品是不是已经一百分了？</div>'; return; }
+    el.innerHTML=list.map(function(r){
+      var c=C(r.cat), left=r.due?days(today(),r.due):null;
+      var over = left!=null && left<0 && !r.conclusion;
+      var cls = r.conclusion?"round done" : (over?"round due":"round");
+      var dueTxt = r.conclusion ? ("已结论 "+esc(r.conclusion.date))
+        : left==null ? "无日期" : left<0 ? ("已逾期 "+(-left)+" 天，必须出结论")
+        : left===0 ? "今天到期" : ("还剩 "+left+" 天");
+      var recs=state.records.filter(function(x){return x.cat===r.cat;}).length;
+      var t={}; state.records.forEach(function(x){ if(x.cat===r.cat&&x.tester) t[x.tester]=1; });
+      var h='<div class="'+cls+'">'+
+        '<div class="rtop"><span class="pill ser">'+esc(c.code+" "+c.name)+'</span>'+
+          '<span class="rq">'+esc(r.q)+'</span>'+
+          '<span class="rdue'+(over?" hot":"")+'">'+dueTxt+'</span></div>'+
+        '<div class="rmeta">开于 '+esc(r.opened||"—")+'　截止 '+esc(r.due||"—")+
+          '　本品类已有 '+recs+' 条记录 / '+Object.keys(t).length+' 位测试人　'+
+          '<strong>真实付费 '+(r.paid||0)+' 笔</strong>'+((r.paid||0)?'':'　← 判据②要求由真实付费验证')+'</div>';
+      if(r.conclusion){
+        var vt={go:"做",no:"不做",again:"再验一轮"}[r.conclusion.verdict]||r.conclusion.verdict;
+        h+='<div class="rverdict"><b>'+esc(vt)+'</b>'+(r.conclusion.note?'　'+esc(r.conclusion.note):'')+
+           '<button class="ghost" data-reopen="'+esc(r.id)+'" style="margin-left:10px;padding:3px 9px;font-size:10px">撤销结论</button></div>';
+      } else {
+        h+='<div class="rdecide"><span class="flabel">出结论</span>'+
+          '<textarea data-note="'+esc(r.id)+'" placeholder="写明理由；选「再验一轮」时必须写清再验什么"></textarea>'+
+          '<div class="opts" style="margin-top:9px">'+
+            '<button class="opt sm g" data-verdict="go" data-rid="'+esc(r.id)+'">做</button>'+
+            '<button class="opt sm b" data-verdict="no" data-rid="'+esc(r.id)+'">不做</button>'+
+            '<button class="opt sm w" data-verdict="again" data-rid="'+esc(r.id)+'">再验一轮</button>'+
+          '</div></div>';
+      }
+      return h+'<div class="mact"><button class="ghost danger" data-del="rounds" data-id="'+esc(r.id)+'">删除轮次</button></div></div>';
+    }).join("");
+
+    Array.prototype.forEach.call(el.querySelectorAll("[data-verdict]"),function(b){
+      b.addEventListener("click",function(){
+        var rid=b.getAttribute("data-rid"), v=b.getAttribute("data-verdict");
+        var ta=el.querySelector('[data-note="'+rid+'"]'), note=ta?ta.value.trim():"";
+        if(v==="again"&&!note){ ta.focus(); ta.placeholder="选「再验一轮」必须写清再验什么——这是主纲的约束，不是我加的"; return; }
+        var r=state.rounds.filter(function(x){return x.id===rid;})[0]; if(!r) return;
+        var body=Object.assign({},r); delete body.id;
+        body.conclusion={verdict:v, note:note, date:today()};
+        put("rounds",rid,body);
+      });
+    });
+    Array.prototype.forEach.call(el.querySelectorAll("[data-reopen]"),function(b){
+      b.addEventListener("click",function(){
+        var r=state.rounds.filter(function(x){return x.id===b.getAttribute("data-reopen");})[0]; if(!r) return;
+        var body=Object.assign({},r); delete body.id; body.conclusion=null; put("rounds",r.id,body);
+      });
+    });
+  }
+
+  /* ---------- stats / 汇总 ---------- */
+  function stats(code){
+    var m=model(code), c=C(m?m.cat:sel.sum), rs=recsOf(code);
+    var t={}; rs.forEach(function(r){ if(r.tester) t[r.tester]=1; });
+    var dist=c.fields.map(function(f){
+      return {f:f, counts:f.options.map(function(o){ return rs.filter(function(r){return (r.values||{})[f.key]===o.v;}).length; })};
+    });
+    var hd=c.headline, head=null;
+    if(hd){
+      var n=rs.filter(function(r){ return (r.values||{})[hd.field]; }).length;
+      var good=rs.filter(function(r){ return (r.values||{})[hd.field]===hd.good; }).length;
+      head={label:hd.label, rate:n?good/n:null, n:n};
+    }
+    var washed=rs.filter(function(r){ return r.washes && r.washes!=="0"; });
+    var feels=rs.filter(function(r){return r.feel;}), looks=rs.filter(function(r){return r.look;});
+    return { m:m, c:c, n:rs.length, testers:Object.keys(t).length, dist:dist, head:head,
+      washedN:washed.length, chCounts:CONFIG.change.map(function(o){ return washed.filter(function(r){return r.change===o.v;}).length; }),
+      feel:feels.length?feels.reduce(function(a,b){return a+b.feel;},0)/feels.length:null,
+      look:looks.length?looks.reduce(function(a,b){return a+b.look;},0)/looks.length:null,
+      quotes:rs.filter(function(r){ return r.quotable && r.words; }).map(function(r){ return r.words; }),
+      badWash:washed.filter(function(r){ return r.change==="clump"||r.change==="shrink"; }).length };
+  }
+  function renderSum(){
+    catChips(document.getElementById("sum-cat"),"sum");
+    chips(document.getElementById("sum-ser"),
+      [{v:"",t:"全部系列"}].concat(CONFIG.series.map(function(s){return {v:s.code,t:s.name+" "+s.en};})),
+      sel.sumSer,function(v){ sel.sumSer=v; render(); });
+
+    var list=models(sel.sum).filter(function(m){ return !sel.sumSer || isBench(m) || m.series===sel.sumSer; });
+    var host=document.getElementById("sum-list");
+    if(!list.length){ host.innerHTML='<div class="empty">这个筛选下还没有型号。</div>'; return; }
+    var all=list.map(function(m){ return stats(m.code); });
+    var ranked=all.slice().sort(function(a,b){
+      var ab=isBench(a.m)?1:0, bb=isBench(b.m)?1:0;
+      if(ab!==bb) return ab-bb;
+      var ar=a.head&&a.head.rate!=null?a.head.rate:-1, br=b.head&&b.head.rate!=null?b.head.rate:-1;
+      return br-ar;
+    });
+    var lead=ranked.filter(function(x){return x.n>=5&&!isBench(x.m);})[0];
+    var bestBench=ranked.filter(function(x){return isBench(x.m)&&x.head&&x.head.rate!=null;})
+                        .sort(function(a,b){return b.head.rate-a.head.rate;})[0];
+    host.innerHTML=ranked.map(function(x){
+      var m=x.m, s=SER(m.series);
+      return '<div class="scard'+(x===lead?" lead":"")+(isBench(m)?" bench":"")+'">'+
+        '<div class="sctop"><span class="fcode'+(isBench(m)?" bench":"")+'">'+esc(m.code)+'</span>'+
+          '<span class="scname">'+esc(m.vname||m.pname||m.alias||"未命名")+'</span>'+
+          (isBench(m)?'<span class="pill">对标品</span>':(s?'<span class="pill ser">'+esc(s.name)+'</span>':''))+
+          '<span class="scmeta">'+(m.cost!=null&&m.cost!==""?(isBench(m)?"售价 ":"成本 ")+Number(m.cost).toFixed(2)+" 元":"未填")+'</span></div>'+
+        '<div class="metrics">'+
+          mcell(x.head?x.head.label:"主指标", x.head&&x.head.rate!=null?Math.round(x.head.rate*100)+"%":"—", x.n+" 条")+
+          mcell("测试人", String(x.testers), "人")+
+          mcell("手感", x.feel==null?"—":x.feel.toFixed(1), "均分")+
+          mcell("看着值钱", x.look==null?"—":x.look.toFixed(1), "均分")+
+          mcell("洗后异常", x.badWash?String(x.badWash):"—", x.washedN+" 条洗过")+
+        '</div>'+ distHtml(x) + quotesHtml(x) + diagHtml(x,bestBench) +
+      '</div>';
+    }).join("");
+  }
+  function mcell(k,v,sub){ return '<div class="m"><div class="mk">'+esc(k)+'</div><div class="mv">'+esc(v)+' <small>'+esc(sub)+'</small></div></div>'; }
+  function distHtml(x){
+    if(!x.n) return "";
+    var h='<div class="bars">';
+    x.dist.forEach(function(d){
+      var tot=d.counts.reduce(function(a,b){return a+b;},0); if(!tot) return;
+      var segs="", top=0;
+      d.counts.forEach(function(cn,i){
+        if(cn) segs+='<div class="f'+(d.f.options[i].tone||"n")+'" style="width:'+((cn/tot)*100).toFixed(1)+'%"></div>';
+        if(cn>d.counts[top]) top=i;
+      });
+      h+='<div class="barrow"><b>'+esc(d.f.label)+'</b><div class="track">'+segs+'</div><span>'+esc(d.f.options[top].t)+'</span></div>';
+    });
+    var ctot=x.chCounts.reduce(function(a,b){return a+b;},0);
+    if(ctot){
+      var s2="", t2=0;
+      x.chCounts.forEach(function(cn,i){
+        if(cn) s2+='<div class="f'+(CONFIG.change[i].tone||"n")+'" style="width:'+((cn/ctot)*100).toFixed(1)+'%"></div>';
+        if(cn>x.chCounts[t2]) t2=i;
+      });
+      h+='<div class="barrow"><b>洗后</b><div class="track">'+s2+'</div><span>'+esc(CONFIG.change[t2].t)+'</span></div>';
+    }
+    return h+'</div>';
+  }
+  function quotesHtml(x){
+    if(!x.quotes.length) return "";
+    return '<div class="quotes">'+x.quotes.slice(0,3).map(function(q){ return '<div class="q">'+esc(q)+'</div>'; }).join("")+'</div>';
+  }
+  function diagHtml(x,bestBench){
+    if(x.n<3) return '<div class="diag">才 '+x.n+' 条，还看不出东西。</div>';
+    var parts=[];
+    if(x.c.code==="FW"){
+      var rs=recsOf(x.m.code);
+      var hot=rs.filter(function(r){ var w=(r.values||{}).warmth; return w==="hot"||w==="warm"; });
+      var cool=rs.filter(function(r){ var w=(r.values||{}).warmth; return w==="ok"||w==="cold"; });
+      var oh=hot.length?hot.filter(function(r){return (r.values||{}).stayed!=="on";}).length/hot.length:null;
+      var oc=cool.length?cool.filter(function(r){return (r.values||{}).stayed!=="on";}).length/cool.length:null;
+      if(oh!=null&&oc!=null){
+        var a=Math.round(oh*100), b=Math.round(oc*100);
+        if(a-b>=25) parts.push('<strong>掉的原因大概是太热</strong>：觉得热的记录里 '+a+'% 没留在脚上，温度正常的只有 '+b+'%。先减薄，别改版型。');
+        else if(b>=40) parts.push('<strong>掉的原因大概是版型</strong>：温度正常也有 '+b+'% 掉了。改袜口或后跟弧线。');
+      }
+    }
+    if(x.badWash>=2) parts.push('<strong>洗后已有 '+x.badWash+' 条报结块或缩水</strong>——结构性问题，不是调克重能解决的。');
+    if(x.testers<3&&x.n>=5) parts.push('这 '+x.n+' 条只来自 '+x.testers+' 个人，体质差异还没被覆盖到。');
+    if(!isBench(x.m)&&bestBench&&x.head&&x.head.rate!=null&&x.n>=5&&bestBench.n>=3){
+      var d=x.head.rate-bestBench.head.rate;
+      if(d<=0) parts.push('<strong>对标品（'+esc(bestBench.m.alias||bestBench.m.code)+'）的'+esc(x.head.label)+'不输给它。</strong>按主纲第六节的验证门槛，缺口还没被证明存在——这一款要么继续改，要么不做。');
+      else if(d>=0.2) parts.push('比最好的对标品高 '+Math.round(d*100)+' 个百分点。这是"缺口存在"目前最硬的一条证据，但判据②说最终要由真实付费确认。');
+    }
+    if(x.feel!=null&&x.look!=null&&Math.abs(x.feel-x.look)>=1){
+      parts.push(x.feel>x.look? '摸着比看着好（'+x.feel.toFixed(1)+' vs '+x.look.toFixed(1)+'）——吃亏在图片上，详情页要靠细节图补。'
+                              : '看着比摸着好（'+x.look.toFixed(1)+' vs '+x.feel.toFixed(1)+'）——容易成交但收到有落差，盯退货率。');
+    }
+    return parts.length?'<div class="diag">'+parts.join(" ")+'</div>':"";
+  }
+
+  /* ---------- 图片报告 ---------- */
+  function renderRep(){
+    catChips(document.getElementById("rep-cat"),"rep");
+    modelChips(document.getElementById("rep-model"),sel.rep,repModel,function(v){ repModel=v; render(); },true);
+    document.getElementById("rep-make").disabled=!repModel;
+  }
+  var PAL={bg:"#FCFAF4", ink:"#1E1B16", ink2:"#5B5447", ink3:"#8B8271",
+           rule:"#E2D9C5", gold:"#8F6E2E", g:"#4A6B45", w:"#9A6B1E", b:"#9A3B26", n:"#B3A794"};
+  function toneColor(t){ return t==="g"?PAL.g : t==="w"?PAL.w : t==="b"?PAL.b : PAL.n; }
+  function wrapTxt(ctx,text,maxW){
+    var out=[], line="";
+    for(var i=0;i<text.length;i++){
+      var ch=text[i];
+      if(ch==="\n"){ out.push(line); line=""; continue; }
+      if(ctx.measureText(line+ch).width>maxW && line){ out.push(line); line=ch; } else line+=ch;
+    }
+    if(line) out.push(line);
+    return out;
+  }
+  function makeReport(){
+    var code=repModel; if(!code) return;
+    var m=model(code); if(!m||isBench(m)) return;
+    var x=stats(code), s=SER(m.series), c=C(m.cat);
+    var msg=document.getElementById("repmsg");
+    msg.textContent="正在生成…";
+    var imgP=m.imageId?new Promise(function(res){
+      var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){res(null);}; im.src="/_blob/"+m.imageId;
+    }):Promise.resolve(null);
+    var fontP=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+
+    Promise.all([imgP,fontP]).then(function(r){
+      var im=r[0], W=1080, P=72, CW=W-P*2;
+      var cv=document.getElementById("repcv"), ctx=cv.getContext("2d");
+      var ops=[], y=0;
+      function text(t,font,color,size,lh,indent){
+        ctx.font=font;
+        wrapTxt(ctx,t,CW-(indent||0)).forEach(function(l){ ops.push({k:"t",t:l,f:font,c:color,x:P+(indent||0),y:y+size}); y+=lh; });
+      }
+      function gap(n){ y+=n; }
+      function rule(){ ops.push({k:"r",y:y}); y+=1; }
+
+      y=P;
+      text(CONFIG.brand+"　"+CONFIG.latin,"600 28px 'Noto Serif SC',serif",PAL.gold,28,42);
+      gap(4);
+      text((s?s.name+" "+s.en+"　·　":"")+c.name,"400 24px 'Noto Sans SC',sans-serif",PAL.ink3,24,38);
+      gap(10);
+      var big=[m.pname||c.pname, m.vname].filter(Boolean).join(" ")+((m.gen||1)>1?" "+roman(m.gen)+"代":"");
+      text(big||m.code,"600 54px 'Noto Serif SC',serif",PAL.ink,54,72);
+      text(m.code+(isLive(m)?"":"　·　"+ST(m.status||"test").t+"，未上线"),
+           "500 30px ui-monospace,monospace",PAL.gold,30,46);
+      gap(14); rule(); gap(24);
+
+      if(im){ var ih=Math.round(CW*0.56); ops.push({k:"img",im:im,x:P,y:y,w:CW,h:ih}); y+=ih+26; }
+      if(m.spec) text(m.spec,"400 26px 'Noto Sans SC',sans-serif",PAL.ink2,26,40);
+      gap(20); rule(); gap(24);
+
+      if(x.head&&x.head.rate!=null){
+        text(x.head.label,"500 24px 'Jost',sans-serif",PAL.ink3,24,36);
+        text(Math.round(x.head.rate*100)+"%","600 76px 'Noto Serif SC',serif",PAL.gold,76,92);
+        gap(4);
+      }
+      text(x.n+" 条记录　"+x.testers+" 位测试人"+(x.washedN?"　其中 "+x.washedN+" 条洗过":""),
+           "400 26px 'Noto Sans SC',sans-serif",PAL.ink2,26,44);
+      gap(18);
+      x.dist.forEach(function(d){
+        var tot=d.counts.reduce(function(a,b){return a+b;},0); if(!tot) return;
+        ops.push({k:"bar",label:d.f.label,counts:d.counts,opts:d.f.options,tot:tot,y:y}); y+=104;
+      });
+      var ctot=x.chCounts.reduce(function(a,b){return a+b;},0);
+      if(ctot){ ops.push({k:"bar",label:"洗后",counts:x.chCounts,opts:CONFIG.change,tot:ctot,y:y}); y+=104; }
+      if(x.feel!=null||x.look!=null){
+        gap(6);
+        text("手感 "+(x.feel==null?"—":x.feel.toFixed(1))+" / 5　　看着值钱 "+(x.look==null?"—":x.look.toFixed(1))+" / 5",
+             "400 26px 'Noto Sans SC',sans-serif",PAL.ink2,26,44);
+      }
+      if(x.quotes.length){
+        gap(16); rule(); gap(22);
+        text("测试人原话","500 24px 'Jost',sans-serif",PAL.ink3,24,40); gap(4);
+        x.quotes.slice(0,3).forEach(function(q){
+          var st=y;
+          text("「"+q+"」","400 28px 'Noto Sans SC',sans-serif",PAL.ink,28,44,24);
+          ops.push({k:"qline",x:P+6,y1:st+4,y2:y-8}); gap(8);
+        });
+      }
+      gap(20); rule(); gap(20);
+      text("记录于 "+today()+"　仅为本次测试的实际记录，非统计调查结果",
+           "400 22px 'Noto Sans SC',sans-serif",PAL.ink3,22,34);
+      y+=P;
+
+      var H=Math.max(600,Math.round(y));
+      cv.width=W; cv.height=H;
+      ctx=cv.getContext("2d");
+      ctx.fillStyle=PAL.bg; ctx.fillRect(0,0,W,H);
+      ctx.textBaseline="alphabetic";
+      ops.forEach(function(o){
+        if(o.k==="t"){ ctx.font=o.f; ctx.fillStyle=o.c; ctx.fillText(o.t,o.x,o.y); }
+        else if(o.k==="r"){ ctx.fillStyle=PAL.rule; ctx.fillRect(P,o.y,CW,1); }
+        else if(o.k==="qline"){ ctx.fillStyle=PAL.rule; ctx.fillRect(o.x,o.y1,3,Math.max(8,o.y2-o.y1)); }
+        else if(o.k==="img"){
+          var sc=Math.max(o.w/o.im.width,o.h/o.im.height), dw=o.im.width*sc, dh=o.im.height*sc;
+          ctx.save(); ctx.beginPath(); ctx.rect(o.x,o.y,o.w,o.h); ctx.clip();
+          ctx.drawImage(o.im,o.x+(o.w-dw)/2,o.y+(o.h-dh)/2,dw,dh); ctx.restore();
+          ctx.strokeStyle=PAL.rule; ctx.lineWidth=1; ctx.strokeRect(o.x+.5,o.y+.5,o.w-1,o.h-1);
+        }
+        else if(o.k==="bar"){
+          ctx.font="400 26px 'Noto Sans SC',sans-serif"; ctx.fillStyle=PAL.ink2;
+          ctx.fillText(o.label,P,o.y+24);
+          var by=o.y+38, bw=CW, bh=18;
+          ctx.fillStyle="#EDE5D4"; ctx.fillRect(P,by,bw,bh);
+          var cx=P;
+          o.counts.forEach(function(cn,i){
+            if(!cn) return;
+            var w=(cn/o.tot)*bw;
+            ctx.fillStyle=toneColor(o.opts[i].tone); ctx.fillRect(cx,by,Math.max(2,w-2),bh); cx+=w;
+          });
+          var idx=o.counts.map(function(cn,i){return {c:cn,i:i};}).filter(function(z){return z.c;})
+                    .sort(function(a,b){return b.c-a.c;}).slice(0,3).sort(function(a,b){return a.i-b.i;});
+          ctx.font="400 22px 'Noto Sans SC',sans-serif";
+          var lx=P;
+          idx.forEach(function(z){
+            ctx.fillStyle=toneColor(o.opts[z.i].tone); ctx.fillRect(lx,by+bh+14,12,12);
+            ctx.fillStyle=PAL.ink3;
+            var lab=o.opts[z.i].t+" "+Math.round((z.c/o.tot)*100)+"%";
+            ctx.fillText(lab,lx+18,by+bh+25);
+            lx+=18+ctx.measureText(lab).width+26;
+          });
+        }
+      });
+      cv.toBlob(function(blob){
+        repBlob=blob;
+        document.getElementById("rep-save").hidden=!blob;
+        msg.textContent = blob ? "生成好了。手机上长按图片可以直接保存，或者点下面的按钮。" : "生成失败。";
+      },"image/png");
+    }).catch(function(){ msg.textContent="生成失败。"; });
+  }
+  function saveReport(){
+    var msg=document.getElementById("repmsg");
+    if(!repBlob){ msg.textContent="先生成一张。"; return; }
+    var m=model(repModel), fn=(m?m.code:"report")+"-感受报告-"+today()+".png";
+    if(!downloads){ msg.textContent="这个视图不能直接下载——长按上面的图片保存。"; return; }
+    downloads.save({filename:fn,data:repBlob}).then(function(){ msg.textContent="已保存。"; })
+      .catch(function(e){ msg.textContent = e.code==="declined" ? "已取消。" : "保存失败（"+e.code+"）——长按图片也能存。"; });
+  }
+
+  /* ---------- 客户页生成 ---------- */
+  function custModels(cat){
+    return models(cat,"own").filter(isLive)
+      .sort(function(a,b){ return (a.rank||0)-(b.rank||0); });
+  }
+  function renderCust(){
+    catChips(document.getElementById("cust-cat"),"cust");
+    var c=C(sel.cust), list=custModels(c.code), host=document.getElementById("cust-list");
+    if(!list.length){
+      host.innerHTML='<div class="empty">这个品类还没有「已上线」的型号。到产品库把要卖的那几个改成已上线，并填好'+esc(c.rankLabel||"档位序")+'。</div>';
+      document.getElementById("cust-make").disabled=true;
+      return;
+    }
+    var noRank=list.filter(function(m){ return m.rank==null||m.rank===""; });
+    host.innerHTML='<div class="feed">'+list.map(function(m){
+      return '<div class="fitem"><span class="fcode">'+esc(m.code)+'</span>'+
+        '<span class="fwho">'+esc([m.pname||c.pname,m.vname].filter(Boolean).join(" ")||m.alias||"未命名")+'</span>'+
+        (m.status==="retired"?pill("已停产","w"):pill("已上线","g"))+
+        (m.rank==null||m.rank===""?pill((c.rankLabel||"档位序")+" 未填","b"):pill((c.rankLabel||"档")+" "+m.rank,""))+
+        '</div>';
+    }).join("")+'</div>'+
+    (noRank.length?'<p class="fsub" style="margin-top:9px;color:var(--b)">有 '+noRank.length+' 个型号没填'+esc(c.rankLabel||"档位序")+'——客户页靠它算"往下推一档"，不填就推不出来。</p>':'');
+    document.getElementById("cust-make").disabled=!!noRank.length;
+  }
+
+  function buildCustomerPage(cat){
+    var c=C(cat), list=custModels(cat);
+    var data={
+      brand:CONFIG.brand, latin:CONFIG.latin, cat:c.code, catName:c.name,
+      rankLabel:c.rankLabel||"档位序", match:c.match||null,
+      fields:c.fields.map(function(f){ return {key:f.key,label:f.label,sub:f.sub||"",options:f.options}; }),
+      models:list.map(function(m){
+        return { code:m.code, rank:m.rank,
+          name:[m.pname||c.pname,m.vname].filter(Boolean).join(" ")||m.alias||m.code,
+          retired:m.status==="retired", spec:m.spec||"" };
+      })
+    };
+    var json=JSON.stringify(data).replace(/<\//g,"<\\/");
+    return CUST_TPL.replace("/*__DATA__*/null",json);
+  }
+
+  var CUST_TPL = [
+'<!doctype html>',
+'<html lang="zh-CN"><head><meta charset="utf-8">',
+'<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
+'<title>哪一版适合你</title>',
+'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@600&display=swap">',
+'<style>',
+':root{--paper:#F7F2E6;--card:#FDFBF5;--sunk:#F1EADA;--ink:#1E1B16;--ink2:#5B5447;--ink3:#8B8271;',
+'--rule:#E2D9C5;--gold:#8F6E2E;--gold2:#B08C4A;--leaf:#6B7659;--alert:#8F4A22;',
+'--sh:0 1px 2px rgba(45,36,20,.05),0 10px 30px -22px rgba(45,36,20,.35);color-scheme:light;',
+'padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}',
+'@media(prefers-color-scheme:dark){:root{--paper:#15130F;--card:#1E1B15;--sunk:#26221A;--ink:#F4EFE2;',
+'--ink2:#A79E8C;--ink3:#7D7566;--rule:#342F25;--gold:#C9A868;--gold2:#B08C4A;--leaf:#9AA687;--alert:#D98A5A;',
+'--sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px -22px rgba(0,0,0,.9)}}',
+'*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.7;',
+'font-family:"Noto Sans SC","PingFang SC",system-ui,sans-serif;-webkit-font-smoothing:antialiased}',
+'.page{max-width:560px;margin:0 auto;padding-inline:22px;padding-block:38px 72px}',
+'.mark{font-family:"Noto Serif SC",serif;font-size:15px;font-weight:600;letter-spacing:.32em;color:var(--gold)}',
+'.mark small{display:block;font-family:"Jost",sans-serif;font-size:9.5px;font-weight:400;letter-spacing:.3em;color:var(--ink3);margin-top:5px}',
+'h1{font-family:"Noto Serif SC",serif;font-weight:600;font-size:clamp(25px,6.4vw,33px);line-height:1.38;margin:26px 0 0;text-wrap:balance}',
+'.lede{color:var(--ink2);font-size:15px;margin:14px 0 0}hr{height:1px;background:var(--rule);border:0;margin:30px 0 0}',
+'.step{padding-block:30px 0}.snum{font-family:"Jost",sans-serif;font-size:11px;font-weight:500;letter-spacing:.2em;color:var(--gold)}',
+'h2{font-family:"Noto Serif SC",serif;font-size:19px;font-weight:600;margin:7px 0 0;line-height:1.5;text-wrap:balance}',
+'.sub{color:var(--ink3);font-size:13.5px;margin:8px 0 0}',
+'.choices{display:flex;flex-direction:column;gap:9px;margin-top:18px}',
+'.ch{font-family:inherit;font-size:16px;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--rule);',
+'border-radius:6px;padding:15px 17px;cursor:pointer;min-height:54px;box-shadow:var(--sh);line-height:1.45}',
+'.ch:hover{border-color:var(--gold2)}.ch[aria-pressed=true]{border-color:var(--gold);background:var(--sunk);font-weight:500}',
+'.ch em{display:block;font-style:normal;font-size:13px;color:var(--ink3);margin-top:3px;font-weight:400}',
+'textarea{font-family:inherit;font-size:16px;width:100%;color:var(--ink);background:var(--card);border:1px solid var(--rule);',
+'border-radius:6px;padding:13px 15px;margin-top:16px;min-height:104px;resize:vertical}',
+'.consent{display:flex;gap:11px;align-items:flex-start;margin-top:18px;background:var(--sunk);border:1px solid var(--rule);border-radius:6px;padding:14px 15px}',
+'.consent input{margin:4px 0 0;width:19px;height:19px;flex:none;accent-color:var(--gold)}',
+'.consent label{font-size:13.5px;color:var(--ink2);line-height:1.6}',
+'.go{font-family:"Jost",sans-serif;font-size:13px;letter-spacing:.16em;text-transform:uppercase;background:var(--ink);',
+'color:var(--paper);border:0;border-radius:6px;padding:17px 22px;cursor:pointer;width:100%;min-height:54px;margin-top:22px}',
+'.go:disabled{opacity:.32}.dots{display:flex;gap:6px;margin-top:26px}',
+'.dot{height:3px;flex:1;background:var(--rule);border-radius:2px}.dot.on{background:var(--gold)}',
+'.verdict{background:var(--card);border:1px solid var(--rule);border-top:3px solid var(--gold);border-radius:7px;',
+'padding:24px 22px;box-shadow:var(--sh);margin-top:26px}.verdict.issue{border-top-color:var(--alert)}',
+'.vlabel{font-family:"Jost",sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3)}',
+'.vname{font-family:"Noto Serif SC",serif;font-size:24px;font-weight:600;margin:9px 0 0;line-height:1.35}',
+'.vbody{color:var(--ink2);font-size:14.5px;margin:14px 0 0}.vbody p{margin:0 0 10px}.vbody p:last-child{margin:0}',
+'.vbody strong{color:var(--ink);font-weight:500}',
+'.recap{margin-top:20px;border-top:1px solid var(--rule);padding-top:16px}',
+'.recap dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:13.5px}',
+'.recap dt{color:var(--ink3)}.recap dd{margin:0;color:var(--ink)}',
+'.send{margin-top:24px;background:var(--sunk);border:1px solid var(--rule);border-radius:7px;padding:18px 17px}',
+'.send h3{font-family:"Noto Serif SC",serif;font-size:15.5px;font-weight:600;margin:0}',
+'.send p{font-size:13.5px;color:var(--ink2);margin:8px 0 0}',
+'#out{font-family:ui-monospace,Menlo,monospace;font-size:13px;line-height:1.65;background:var(--card);min-height:236px}',
+'.copy{font-family:"Jost",sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;background:transparent;',
+'color:var(--ink);border:1px solid var(--ink3);border-radius:6px;padding:13px 20px;cursor:pointer;width:100%;min-height:48px;margin-top:12px}',
+'#copied{font-size:12.5px;color:var(--leaf);margin:10px 0 0;min-height:19px}',
+'.note{font-size:12.5px;color:var(--ink3);margin-top:26px;line-height:1.65}',
+'[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{transition:none!important}}',
+'</style></head><body><div class="page" id="app"></div>',
+'<script>',
+'(function(){"use strict";var D=/*__DATA__*/null;',
+'var a={},steps=[],cur=0,el=document.getElementById("app");',
+'function esc(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){',
+'return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}',
+'steps.push({k:"model",label:"你手上这双是哪一版",sub:"吊牌上有写。记不清也没关系。",',
+'opts:D.models.map(function(m){return {v:m.code,t:m.name+(m.retired?"（已停产）":""),e:m.spec};})',
+'.concat([{v:"__unknown",t:"记不清了"}])});',
+'steps.push({k:"nights",label:"大概用了几晚",opts:[{v:"1",t:"才一两晚"},{v:"2",t:"三五晚"},{v:"3",t:"一两周"},{v:"4",t:"更久，洗过几次了"}]});',
+'D.fields.forEach(function(f){steps.push({k:f.key,short:f.label,label:f.label==="温度"?"半夜和清早，脚是什么感觉":f.label,sub:f.sub,',
+'opts:f.options.map(function(o){return {v:o.v,t:o.t};})});});',
+'steps.push({k:"overall",label:"总的来说呢",opts:[{v:"fit",t:"挺合适的",e:"会继续用"},',
+'{v:"misfit",t:"不太合适",e:"东西没坏，但感觉不对"},{v:"issue",t:"东西出了问题",e:"坏了、变形了、或者跟拿到时不一样了"}]});',
+'steps.push({k:"words",label:"还想说点什么吗",sub:"哪里硌、哪里勒、比想象的好或差——越具体越有用。不想写可以直接跳过。",free:true});',
+'function M(code){for(var i=0;i<D.models.length;i++)if(D.models[i].code===code)return D.models[i];return null;}',
+'function byRank(dir,from){var f=M(from);if(!f||f.rank==null)return null;var best=null;',
+'D.models.forEach(function(m){if(m.retired||m.rank==null)return;',
+'if(dir<0&&m.rank<f.rank&&(!best||m.rank>best.rank))best=m;',
+'if(dir>0&&m.rank>f.rank&&(!best||m.rank<best.rank))best=m;});return best;}',
+'function decide(){var mt=D.match;',
+'if(a.overall==="issue")return{kind:"issue",label:"这条会进我们的问题记录",name:"这不是版本选错，是东西本身的问题",',
+'body:["换个厚薄解决不了。<strong>这一件我们换新的，运费我们出。</strong>如果你不想再试，直接退款也可以，不用解释。",',
+'"麻烦你在上面多写两句，或者直接发张照片给我们——我们需要知道是哪一批出的问题。"]};',
+'if(!mt)return{kind:"fit",label:"收到",name:"谢谢你，这些我们都会看",',
+'body:["每一条我们都会读。如果有需要调整的，我们会直接联系你。"]};',
+'var w=a[mt.field],hot=mt.hot.indexOf(w)>=0,cold=mt.cold.indexOf(w)>=0;',
+'var st=mt.stayField?a[mt.stayField]:null,kicked=st===mt.kicked,slipped=st===mt.slipped;',
+'var wet=mt.dampField&&mt.wet.indexOf(a[mt.dampField])>=0;',
+'if(hot||(kicked&&hot)){var thinner=byRank(-1,a.model);',
+'if(thinner)return{kind:"match",label:"建议换成",name:thinner.name,',
+'body:["你的情况是典型的<strong>偏厚</strong>"+(kicked?"，而且半夜自己蹬掉了":"")+(wet?"，里面还发潮":"")+"。",',
+'kicked?"半夜踢掉这件事，绝大多数时候不是不合脚，是太热了——身体在自己散热。所以先换薄的，别急着让我们收紧袜口，收紧只会更热。":"",',
+'"<strong>"+esc(thinner.name)+"我们直接给你寄，这一件你留着或者送人，不用寄回来。</strong>差价不用补。"]};',
+'return{kind:"match",label:"你可能不需要更薄，而是别的东西",name:"你手上已经是最薄的一版了",',
+'body:["再往下减厚度意义不大。两种可能：一是你本来就属于睡觉容易发热的体质，这个品类未必适合你，我们不想硬卖；二是室温偏高，或者床品本身就很保暖。",',
+'"<strong>我们想先问你室温大概多少、盖什么被子，再决定要不要换。</strong>如果结论是不合适，这一件我们退款，你不用寄回来。"]};}',
+'if(cold){var thicker=byRank(1,a.model);',
+'if(thicker)return{kind:"match",label:"建议换成",name:thicker.name,',
+'body:["你偏冷，手上这一版对你来说填充不够。",',
+'"<strong>"+esc(thicker.name)+"我们直接给你寄，这一件你留着，不用寄回来。</strong>差价不用补。"]};',
+'return{kind:"match",label:"换更厚的解决不了，我们想多了解一点",name:"你手上已经是最厚的一版了",',
+'body:["再加厚很快会到臃肿的极限，而且未必真的更暖。更可能的原因是<strong>贴合</strong>或者<strong>血液循环</strong>：和身体之间有空隙，热量会一直漏。",',
+'"<strong>麻烦你告诉我们你的脚长和平时的鞋码，我们看是不是号型偏大。</strong>如果是版型问题，我们会改，改好了重寄一件给你。"]};}',
+'if(slipped)return{kind:"fit",label:"厚薄是对的，但版型要改",name:"这一版就是你的厚度",',
+'body:["温度你说刚好，说明厚薄没选错。滑下去是<strong>版型问题</strong>——袜口的弹性或者后跟的弧线不够贴。",',
+'"这个换版本解决不了，得我们改纸样。你这条记录我们会记进改版清单，下一版做出来先寄你一件试。"]};',
+'if(wet)return{kind:"match",label:"厚薄大致对，但透气要调",name:"这一版的厚度可以，闷是另一回事",',
+'body:["温度刚好但明显发潮，说明保暖够了，问题在<strong>排湿</strong>。这跟贴肤那一层的材质和填充层数有关，不是简单减薄能解决的。",',
+'"<strong>我们有一版更透气的做法还在测。</strong>如果你愿意，我们做好了寄你一件，你只要告诉我们闷不闷。"]};',
+'return{kind:"fit",label:"不用换",name:"你手上这版就是对的",',
+'body:["各项听起来都合适——这一版跟你的体质是配的，换来换去反而会退步。",',
+'a.overall==="misfit"?"你选了「不太合适」，但这几项都还行——<strong>麻烦你在上面多写两句</strong>，是哪里让你觉得不对？这种说不清的不对劲，往往是我们最该改的地方。":"如果之后洗过几次有变化，随时再填一次这个页面。填充在洗过三五次之后的变化，是我们最想知道的一段。"]};}',
+'function head(){return \'<div class="mark">\'+esc(D.brand)+\'<small>\'+esc(D.latin)+\'</small></div>\';}',
+'function intro(){return \'<h1>用下来是什么样的，<br>能不能告诉我们</h1>\'+',
+'\'<p class="lede">人和人的体质不一样。同一件东西，有人嫌闷，有人嫌薄——这不是谁错了，是本来就该有不同的厚度。</p>\'+',
+'\'<p class="lede">所以我们想知道你这几晚是怎么过的。答完会告诉你哪一版更适合你；如果拿错了版本，我们给你换。</p><hr>\';}',
+'function dots(){var h=\'<div class="dots">\';for(var i=0;i<steps.length;i++)h+=\'<span class="dot\'+(i<=cur?" on":"")+\'"></span>\';return h+"</div>";}',
+'function render(){var s=steps[cur];',
+'var h=head()+(cur===0?intro():"")+\'<section class="step"><span class="snum">\'+(cur+1)+" / "+steps.length+\'</span>\'+',
+'\'<h2>\'+esc(s.label)+"</h2>"+(s.sub?\'<p class="sub">\'+esc(s.sub)+"</p>":"");',
+'if(s.free){h+=\'<textarea id="words" placeholder="「脚趾那块有点顶」「洗完手感变硬了」">\'+esc(a.words||"")+"</textarea>"+',
+'\'<div class="consent"><input type="checkbox" id="consent"\'+(a.consent?" checked":"")+\'>\'+',
+'\'<label for="consent">可以把我这段话匿名引用出去（不带姓名、不带照片）。不勾也没关系，我们照样会看。</label></div>\'+',
+'\'<button class="go" id="fin">看结果</button>\';}',
+'else{h+=\'<div class="choices">\'+s.opts.map(function(o){return \'<button class="ch" data-v="\'+esc(o.v)+\'" aria-pressed="\'+(a[s.k]===o.v?"true":"false")+\'">\'+esc(o.t)+(o.e?\'<em>\'+esc(o.e)+"</em>":"")+"</button>";}).join("")+"</div>";}',
+'h+="</section>"+dots();el.innerHTML=h;',
+'if(s.free){document.getElementById("fin").addEventListener("click",function(){',
+'a.words=document.getElementById("words").value.trim();a.consent=document.getElementById("consent").checked;result();});}',
+'else{Array.prototype.forEach.call(el.querySelectorAll(".ch"),function(b){b.addEventListener("click",function(){',
+'a[s.k]=b.getAttribute("data-v");if(cur<steps.length-1){cur++;render();window.scrollTo({top:0,behavior:"smooth"});}else result();});});}}',
+'function result(){var d=decide(),m=M(a.model);',
+'var lines=["【"+D.brand+" "+D.catName+" 反馈】"];',
+'lines.push("型号："+(a.model==="__unknown"?"客户记不清":a.model+(m?" "+m.name:"")));',
+'var LB={nights:"用了多久",overall:"总评"};',
+'steps.forEach(function(s){if(s.k==="model"||s.free)return;',
+'var lab=LB[s.k]||s.short||s.label,v=a[s.k];if(!v)return;',
+'var t=v;(s.opts||[]).forEach(function(o){if(o.v===v)t=o.t;});lines.push(lab+"："+t);});',
+'if(a.words)lines.push("想说的："+a.words);',
+'lines.push("匿名引用："+(a.consent?"可以":"不要"));lines.push("页面给的建议："+d.name);',
+'var recap=lines.slice(1).map(function(l){var i=l.indexOf("：");',
+'return "<dt>"+esc(l.slice(0,i))+"</dt><dd>"+esc(l.slice(i+1))+"</dd>";}).join("");',
+'el.innerHTML=head()+\'<section class="step"><span class="snum">结果</span><h2>按你说的情况</h2>\'+',
+'\'<div class="verdict\'+(d.kind==="issue"?" issue":"")+\'"><span class="vlabel">\'+esc(d.label)+"</span>"+',
+'\'<div class="vname">\'+esc(d.name)+\'</div><div class="vbody">\'+d.body.filter(Boolean).map(function(p){return "<p>"+p+"</p>";}).join("")+"</div></div>"+',
+'\'<div class="recap"><dl>\'+recap+"</dl></div>"+',
+'\'<div class="send"><h3>把这段发给我们</h3><p>点一下复制，粘到微信发过来就行。我们会一条条看，需要换款的会直接安排。</p>\'+',
+'\'<textarea id="out" readonly></textarea><button class="copy" id="cp">复制这段</button><p id="copied"></p></div>\'+',
+'\'<p class="note">这个页面不会自己上传任何东西——你答的内容只留在你的手机上，除了你自己复制发给我们的那一段。所以如果你不发，我们就看不到。</p></section>\';',
+'var box=document.getElementById("out");box.value=lines.join("\\n");',
+'document.getElementById("cp").addEventListener("click",function(){var msg=document.getElementById("copied");',
+'box.focus();box.select();box.setSelectionRange(0,box.value.length);',
+'function ok(){msg.textContent="已复制，去微信粘贴就行。";}',
+'try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(box.value).then(ok,',
+'function(){msg.textContent="已全选——长按选中的文字，选「复制」。";});return;}}catch(e){}',
+'try{document.execCommand("copy");ok();}catch(e){msg.textContent="已全选——长按选中的文字，选「复制」。";}});',
+'window.scrollTo({top:0,behavior:"smooth"});}',
+'render();})();',
+'<\/script></body></html>'
+].join("\n");
+
+  function downloadCust(){
+    var msg=document.getElementById("custmsg"), cat=sel.cust;
+    var html=buildCustomerPage(cat);
+    var blob=new Blob([html],{type:"text/html"});
+    var fn="renquan-"+cat.toLowerCase()+"-feedback-"+today()+".html";
+    if(!downloads){ msg.textContent="这个视图不能下载文件。把这一段告诉我，我可以直接发成链接。"; return; }
+    downloads.save({filename:fn,data:blob}).then(function(){
+      msg.textContent="已导出 "+fn+"（含 "+custModels(cat).length+" 个型号）。扔到你自己的空间就能用，或者发给我我帮你发成链接。";
+    }).catch(function(e){
+      msg.textContent = e.code==="declined" ? "已取消。" : "导出失败（"+e.code+"）。";
+    });
+  }
+
+  /* ---------- render ---------- */
+  var busy=false;
+  function render(){
+    if(busy) return; busy=true;
+    try{ renderLib(); renderLog(); renderFeed(); renderRoundForm(); renderRounds(); renderSum(); renderRep(); renderCust(); }
+    finally{ busy=false; }
+  }
+
+  /* ---------- wiring ---------- */
+  document.getElementById("brandmark").innerHTML=esc(CONFIG.brand)+"<small>"+esc(CONFIG.latin)+"</small>";
+  document.getElementById("log-date").value=today();
+  document.getElementById("log-save").addEventListener("click",saveLog);
+  document.getElementById("round-save").addEventListener("click",saveRound);
+  ["round-q","round-due"].forEach(function(id){ document.getElementById(id).addEventListener("input",renderRoundForm); });
+  document.getElementById("rep-make").addEventListener("click",makeReport);
+  document.getElementById("rep-save").addEventListener("click",saveReport);
+  document.getElementById("cust-make").addEventListener("click",downloadCust);
+  document.getElementById("lib-add").addEventListener("click",function(){ addOwn(sel.lib,newGrade); });
+  document.getElementById("lib-bench").addEventListener("click",function(){ addBench(sel.lib); });
+  document.getElementById("lib-seed").addEventListener("click",function(){
+    var have={}; models("FW","own").forEach(function(m){ have[m.code]=1; });
+    CONFIG.seedFW.forEach(function(s){
+      var b=Object.assign({cat:"FW", kind:"own", pname:C("FW").pname, imageId:null},s);
+      if(!have[buildCode(b)]) create(b);
+    });
+  });
+  document.addEventListener("click",function(e){
+    var b=e.target.closest?e.target.closest("[data-del]"):null; if(!b) return;
+    drop(b.getAttribute("data-del"),b.getAttribute("data-id"));
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(btn){
+    btn.addEventListener("click",function(){
+      Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(o){ o.setAttribute("aria-selected",o===btn?"true":"false"); });
+      ["lib","log","round","sum","report","cust"].forEach(function(t){
+        document.getElementById("tab-"+t).hidden = (t!==btn.getAttribute("data-tab"));
+      });
+      window.scrollTo({top:0,behavior:"instant"});
+    });
+  });
+
+  fromLocal();
+  render();
+
+  if(window.claude&&window.claude.use){
+    window.claude.use("db").then(function(d){
+      if(!d){ setStatus("云端未启用，记录只存在这台设备的浏览器里。",true); return; }
+      db=d; setStatus("已连接云端，换设备也能接着记。");
+      ["models","records","rounds"].forEach(function(coll){
+        db.collection(coll).limit(1000).onSnapshot(function(snap){
+          state[coll]=snap.docs.map(function(x){ return Object.assign({id:x.id},x.data()||{}); });
+          mirror(); render();
+        },function(e){ setStatus("云端订阅中断（"+e.code+"），改用本机。",true); });
+      });
+    });
+    window.claude.use("assets").then(function(a){ assets=a; });
+    window.claude.use("downloads").then(function(d){ downloads=d; });
+  } else {
+    setStatus("记录存在这台设备的浏览器里。",true);
+  }
+})();
+</script>
+
+</body>
+</html>
