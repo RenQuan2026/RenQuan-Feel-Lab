@@ -890,12 +890,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     });
     if(dup.length && !window.confirm("同一天、同型号、同样的原话已经有一条了。还要再存一条吗？")) { msg.textContent="没有保存。"; return; }
     put("records",uid(),{ code:d.code, cat:d.cat, date:d.date||today(), tester:"客户",
-      source:"customer", ref:d.ref||"", values:d.values||{},
+      source:"customer", values:d.values||{},
       washes:null, change:null, feel:null, look:null,
       nights:d.nights||"", overall:d.overall||"", advice:d.advice||"",
       words:d.words||"", quotable:!!d.releasable });
     document.getElementById("paste-in").value="";
-    msg.textContent="已存成 "+d.code+" 的一条客户记录"+(d.ref?"（批次/单号 "+d.ref+"）":"")+"。";
+    msg.textContent="已存成 "+d.code+" 的一条客户记录。";
     render();
   }
 
@@ -1301,7 +1301,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         '<span class="fwho">'+esc([m.pname||c.pname,m.vname].filter(Boolean).join(" ")||m.alias||"未命名")+'</span>'+
         (m.status==="retired"?pill("已停产","w"):pill("已上线","g"))+
         (m.rank==null||m.rank===""?pill((c.rankLabel||"档位序")+" 未填","b"):pill((c.rankLabel||"档")+" "+m.rank,""))+
-        '<span class="fnote">链接末尾加 <code>?m='+esc(m.code)+'</code>；要追到具体哪一批、哪一单，再加 <code>&amp;r=批次或单号</code></span>'+
+        '<span class="fnote">发给买了这一件的客户时，链接末尾加 <code>?m='+esc(m.code)+'</code></span>'+
         '</div>';
     }).join("")+'</div>'+
     (noRank.length?'<p class="fsub" style="margin-top:9px;color:var(--b)">有 '+noRank.length+' 个型号没填'+esc(c.rankLabel||"档位序")+'——客户页靠它算"往下推一档"，不填就推不出来。</p>':'');
@@ -1401,10 +1401,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
    而且你不知道它被污染了。链接里带不上时才退回自选。 */
 'var qm=(location.search.match(/[?&]m=([^&]+)/)||[])[1];',
 'var LOCK=qm?M(decodeURIComponent(qm)):null;',
-/* &r= 是批次／订单号的位置。批次层还没建，但位置现在就留出来——
-   不留的话，从今天到批次层落地之间收的每一条反馈，将来都归不了批。 */
-'var REF=(location.search.match(/[?&]r=([^&]+)/)||[])[1];',
-'REF=REF?decodeURIComponent(REF):"";',
 'if(LOCK){a.model=LOCK.code;}',
 'else{steps.push({k:"model",label:"你手上这一件是哪一版",sub:"吊牌上有写。记不清也没关系。",',
 'opts:D.models.map(function(m){return {v:m.code,t:m.name+(m.retired?"（已停产）":""),e:m.spec};})',
@@ -1494,7 +1490,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
    两条路送的是同一个东西，所以将来接上服务器，之前收的反馈也对得上。
    它的形状就是 records 的一条——服务器那头的活只是原样写进去。 */
 'var values={};D.fields.forEach(function(f){if(a[f.key])values[f.key]=a[f.key];});',
-'var payload={v:D.pv,cat:D.cat,code:(a.model==="__unknown"?"":a.model),ref:REF,',
+'var payload={v:D.pv,cat:D.cat,code:(a.model==="__unknown"?"":a.model),',
 'source:"customer",date:new Date().toISOString().slice(0,10),values:values,',
 'nights:a.nights||"",overall:a.overall||"",words:a.words||"",releasable:!!a.consent,advice:d.name};',
 'var blob=b64(JSON.stringify(payload));',
