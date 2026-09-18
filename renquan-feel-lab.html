@@ -287,6 +287,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <!-- 记感受 -->
   <section class="tab" id="tab-log" hidden>
     <h2>记一条感受</h2>
+    <details class="scheme" id="paste-box">
+      <summary>粘贴客户反馈</summary>
+      <div class="srule">
+        <p>客户在客户页答完之后，会发一段文字给你。<strong>整段粘进来，点一下就还原成一条记录</strong>——不用照着重敲。来源自动记成「客户」，型号、批次号、是否允许引用都在那段文字里带着。</p>
+        <p style="margin-top:9px"><textarea id="paste-in" placeholder="把客户发来的那整段粘在这里（包含最后那行 #RQ1:… 的编码）"></textarea></p>
+        <div class="mact" style="border:0;padding:0;margin:9px 0 0">
+          <button class="ghost key" id="paste-go">解析并保存</button>
+        </div>
+        <p class="fsub" id="paste-msg" style="margin:9px 0 0"></p>
+      </div>
+    </details>
     <p class="hint">问法跟着<strong>品类</strong>走，在代码顶部 <code>CONFIG.categories</code> 里改。对标品用虚线框，问法完全一样——只有同一套问法，比较才成立。</p>
     <div class="card">
       <div class="field">
@@ -412,6 +423,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <div id="cust-list"></div>
       </div>
     </div>
+    <div class="card" style="padding:14px">
+      <div class="field" style="margin-bottom:0">
+        <span class="flabel">提交地址（有服务器之后再填）</span>
+        <p class="fsub">填上之后，客户答完点一下「发送给纫荃」就直接交过来，不用复制、不用切微信。<strong>现在留空就行</strong>——留空时客户页走离线那条路（复制并拉起微信），送的是同一份数据、同一个格式，所以将来填上地址，之前收的反馈也对得上。填完要重新导出一次客户页。</p>
+        <input type="text" id="cust-intake" placeholder="https://…（留空 = 走离线）">
+      </div>
+    </div>
     <div style="display:flex; gap:9px; flex-wrap:wrap">
       <button class="ghost key" id="cust-make">生成并下载客户页</button>
     </div>
@@ -513,6 +531,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         headline:{field:"overall", good:"good", label:"说好的比例"} }
     ],
 
+    /* ==========  客户反馈的收口  ==========
+       现在没有服务器，将来会有。所以这里定死的是【数据长什么样】，
+       不是【怎么送过来】——送法可以换，格式不能换。
+
+       intakeUrl 空着  → 客户页走离线路：客户点一下，答案编码进剪贴板，顺手拉起微信。
+       intakeUrl 填上  → 客户页直接 POST 过去，客户不用离开页面。
+
+       两条路送的是同一个载荷（见 PAYLOAD_V）。所以将来服务器就位，
+       客户页不用改，之前用离线路收回来的反馈格式也完全一样、能对上。
+       地址也可以在「客户页」页签里直接填，不必改代码。 */
+    intakeUrl:"",
+
     /* 记录来源。研发端和售后端写进同一个 records，但必须分得开：
        内测是受控的（同一个人可以先试 A 再试 B），客户是观察的（他只有他买的那一款，
        而且是他自己挑的）。合成一个百分比会把选品偏差算成产品性能。 */
@@ -536,7 +566,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   };
   /* ===================== CONFIG 结束 ===================== */
 
+  /* 客户反馈载荷的版本号。载荷字段一旦变了就把它 +1，
+     这样旧格式的反馈还认得出来，不会被当成新格式解错。 */
+  var PAYLOAD_V=1;
   var LS="renquan-feellab-v3";
+  var LS_INTAKE="renquan-feellab-intake";
   var db=null, assets=null, downloads=null;
   var state={models:[], records:[], rounds:[]};
   var draft={}, newGrade=4;
@@ -554,6 +588,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   function days(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000); }
   function num(v){ var n=parseFloat(v); return isFinite(n)?n:null; }
+  /* UTF-8 安全的 base64。客户那段文字里夹一行编码，微信转一圈不会被吃掉。 */
+  function b64enc(str){ return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    function(_,h){ return String.fromCharCode(parseInt(h,16)); })); }
+  function b64dec(b){ return decodeURIComponent(Array.prototype.map.call(atob(b),
+    function(c){ return "%"+("00"+c.charCodeAt(0).toString(16)).slice(-2); }).join("")); }
+  function intakeUrl(){ try{ return localStorage.getItem(LS_INTAKE)||CONFIG.intakeUrl||""; }catch(e){ return CONFIG.intakeUrl||""; } }
   function optT(list,v){ for(var i=0;i<list.length;i++) if(list[i].v===v) return list[i]; return null; }
 
   /* ---------- 编码与全称 ---------- */
@@ -832,6 +872,33 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     document.getElementById("log-save").disabled =
       !(draft.code && c.fields.every(function(f){ return draft[f.key]; }) && draft.__washes);
   }
+  /* 客户那段文字末尾带一行 #RQ<版本>:<base64>，装的就是客户页发出的那个载荷。
+     将来接上服务器，服务器收到的是同一个载荷——这里解出来的和那边收到的
+     是同一份东西，所以两条路收回来的记录完全可以混在一起用。 */
+  function importPaste(){
+    var msg=document.getElementById("paste-msg"), raw=document.getElementById("paste-in").value;
+    var m=raw.match(/#RQ(\d+):([A-Za-z0-9+/=]+)/);
+    if(!m){ msg.textContent="没认出编码。要把客户发来的那一整段都粘进来，包括最后那行 #RQ 开头的。"; return; }
+    if(parseInt(m[1],10)>PAYLOAD_V){ msg.textContent="这条反馈来自更新版本的客户页（v"+m[1]+"），当前测试台认到 v"+PAYLOAD_V+"。先更新测试台。"; return; }
+    var d;
+    try{ d=JSON.parse(b64dec(m[2])); }catch(e){ msg.textContent="编码读不出来，可能复制时被截断了。让客户重发一次整段。"; return; }
+    if(!d||!d.cat){ msg.textContent="内容不完整，没有保存。"; return; }
+    if(!d.code){ msg.textContent="这条反馈没有型号（客户选了「记不清了」，或者发给他的链接没带 ?m=）。补上型号再手工记一条。"; return; }
+    if(!model(d.code)){ msg.textContent="产品库里没有 "+d.code+" 这个型号，没有保存。"; return; }
+    var dup=state.records.filter(function(r){
+      return r.source==="customer" && r.code===d.code && r.date===d.date && (r.words||"")===(d.words||"");
+    });
+    if(dup.length && !window.confirm("同一天、同型号、同样的原话已经有一条了。还要再存一条吗？")) { msg.textContent="没有保存。"; return; }
+    put("records",uid(),{ code:d.code, cat:d.cat, date:d.date||today(), tester:"客户",
+      source:"customer", ref:d.ref||"", values:d.values||{},
+      washes:null, change:null, feel:null, look:null,
+      nights:d.nights||"", overall:d.overall||"", advice:d.advice||"",
+      words:d.words||"", quotable:!!d.releasable });
+    document.getElementById("paste-in").value="";
+    msg.textContent="已存成 "+d.code+" 的一条客户记录"+(d.ref?"（批次/单号 "+d.ref+"）":"")+"。";
+    render();
+  }
+
   function saveLog(){
     var c=C(sel.log), vals={};
     c.fields.forEach(function(f){ vals[f.key]=draft[f.key]; });
@@ -1220,6 +1287,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   }
   function renderCust(){
     catChips(document.getElementById("cust-cat"),"cust");
+    var iu=document.getElementById("cust-intake");
+    if(document.activeElement!==iu) iu.value=intakeUrl();
     var c=C(sel.cust), list=custModels(c.code), host=document.getElementById("cust-list");
     if(!list.length){
       host.innerHTML='<div class="empty">这个品类还没有「已上线」的型号。到产品库把要卖的那几个改成已上线，并填好'+esc(c.rankLabel||"档位序")+'。</div>';
@@ -1232,7 +1301,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         '<span class="fwho">'+esc([m.pname||c.pname,m.vname].filter(Boolean).join(" ")||m.alias||"未命名")+'</span>'+
         (m.status==="retired"?pill("已停产","w"):pill("已上线","g"))+
         (m.rank==null||m.rank===""?pill((c.rankLabel||"档位序")+" 未填","b"):pill((c.rankLabel||"档")+" "+m.rank,""))+
-        '<span class="fnote">发给买了这一件的客户时，链接末尾加 <code>?m='+esc(m.code)+'</code></span>'+
+        '<span class="fnote">链接末尾加 <code>?m='+esc(m.code)+'</code>；要追到具体哪一批、哪一单，再加 <code>&amp;r=批次或单号</code></span>'+
         '</div>';
     }).join("")+'</div>'+
     (noRank.length?'<p class="fsub" style="margin-top:9px;color:var(--b)">有 '+noRank.length+' 个型号没填'+esc(c.rankLabel||"档位序")+'——客户页靠它算"往下推一档"，不填就推不出来。</p>':'');
@@ -1243,6 +1312,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     var c=C(cat), list=custModels(cat);
     var data={
       brand:CONFIG.brand, latin:CONFIG.latin, cat:c.code, catName:c.name,
+      intakeUrl:intakeUrl(), pv:PAYLOAD_V,
       rankLabel:c.rankLabel||"档位序", match:c.match||null,
       fields:c.fields.map(function(f){ return {key:f.key,label:f.label,ask:f.ask||"",sub:f.sub||"",options:f.options}; }),
       models:list.map(function(m){
@@ -1323,12 +1393,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'var a={},steps=[],cur=0,el=document.getElementById("app");',
 'function esc(s){return String(s==null?"":s).replace(/[&<>"\']/g,function(c){',
 'return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[c];});}',
+'function b64(s){return btoa(encodeURIComponent(s).replace(/%([0-9A-F]{2})/g,',
+'function(_,h){return String.fromCharCode(parseInt(h,16));}));}',
 'function M(code){for(var i=0;i<D.models.length;i++)if(D.models[i].code===code)return D.models[i];return null;}',
 /* 型号由链接指定：?m=FW-401A。客户自己从列表里挑，大概率挑错，
    而挑错的记录比没有记录更糟——它会挂到错误的型号上，把那一款的数字污染掉，
    而且你不知道它被污染了。链接里带不上时才退回自选。 */
 'var qm=(location.search.match(/[?&]m=([^&]+)/)||[])[1];',
 'var LOCK=qm?M(decodeURIComponent(qm)):null;',
+/* &r= 是批次／订单号的位置。批次层还没建，但位置现在就留出来——
+   不留的话，从今天到批次层落地之间收的每一条反馈，将来都归不了批。 */
+'var REF=(location.search.match(/[?&]r=([^&]+)/)||[])[1];',
+'REF=REF?decodeURIComponent(REF):"";',
 'if(LOCK){a.model=LOCK.code;}',
 'else{steps.push({k:"model",label:"你手上这一件是哪一版",sub:"吊牌上有写。记不清也没关系。",',
 'opts:D.models.map(function(m){return {v:m.code,t:m.name+(m.retired?"（已停产）":""),e:m.spec};})',
@@ -1413,21 +1489,54 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'lines.push("匿名引用："+(a.consent?"可以":"不要"));lines.push("页面给的建议："+d.name);',
 'var recap=lines.slice(1).map(function(l){var i=l.indexOf("：");',
 'return "<dt>"+esc(l.slice(0,i))+"</dt><dd>"+esc(l.slice(i+1))+"</dd>";}).join("");',
+/* ===== 载荷：今天定死，将来不改 =====
+   有服务器时 POST 它，没有时把它编码进客户复制的那段文字。
+   两条路送的是同一个东西，所以将来接上服务器，之前收的反馈也对得上。
+   它的形状就是 records 的一条——服务器那头的活只是原样写进去。 */
+'var values={};D.fields.forEach(function(f){if(a[f.key])values[f.key]=a[f.key];});',
+'var payload={v:D.pv,cat:D.cat,code:(a.model==="__unknown"?"":a.model),ref:REF,',
+'source:"customer",date:new Date().toISOString().slice(0,10),values:values,',
+'nights:a.nights||"",overall:a.overall||"",words:a.words||"",releasable:!!a.consent,advice:d.name};',
+'var blob=b64(JSON.stringify(payload));',
+'var full=lines.join("\\n")+"\\n\\n#RQ"+D.pv+":"+blob;',
 'el.innerHTML=head()+\'<section class="step"><span class="snum">结果</span><h2>按你说的情况</h2>\'+',
 '\'<div class="verdict\'+(d.kind==="issue"?" issue":"")+\'"><span class="vlabel">\'+esc(d.label)+"</span>"+',
 '\'<div class="vname">\'+esc(d.name)+\'</div><div class="vbody">\'+d.body.filter(Boolean).map(function(p){return "<p>"+p+"</p>";}).join("")+"</div></div>"+',
 '\'<div class="recap"><dl>\'+recap+"</dl></div>"+',
-'\'<div class="send"><h3>把这段发给我们</h3><p>点一下复制，粘到微信发过来就行。我们会一条条看，需要换款的会直接安排。</p>\'+',
-'\'<textarea id="out" readonly></textarea><button class="copy" id="cp">复制这段</button><p id="copied"></p></div>\'+',
-'\'<p class="note">这个页面不会自己上传任何东西——你答的内容只留在你的手机上，除了你自己复制发给我们的那一段。所以如果你不发，我们就看不到。</p></section>\';',
-'var box=document.getElementById("out");box.value=lines.join("\\n");',
-'document.getElementById("cp").addEventListener("click",function(){var msg=document.getElementById("copied");',
-'box.focus();box.select();box.setSelectionRange(0,box.value.length);',
-'function ok(){msg.textContent="已复制，去微信粘贴就行。";}',
-'try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(box.value).then(ok,',
-'function(){msg.textContent="已全选——长按选中的文字，选「复制」。";});return;}}catch(e){}',
-'try{document.execCommand("copy");ok();}catch(e){msg.textContent="已全选——长按选中的文字，选「复制」。";}});',
+'(D.intakeUrl?',
+'\'<div class="send"><h3>最后一步</h3><p>点一下发送，就交给我们了。需要换款的我们会直接联系你。</p>\'+',
+'\'<button class="go" id="send">发送给纫荃</button><p id="copied"></p></div>\':'+
+'\'<div class="send"><h3>把这段发给我们</h3><p>点一下，内容会复制好并打开微信，你粘贴发过来就行。我们会一条条看，需要换款的会直接安排。</p>\'+',
+'\'<button class="go" id="cp">复制并打开微信</button><p id="copied"></p>\'+',
+'\'<textarea id="out" readonly hidden></textarea></div>\')+',
+'\'<p class="note" id="privnote"></p></section>\';',
+'var box=document.getElementById("out");if(box)box.value=full;',
+'document.getElementById("privnote").textContent=D.intakeUrl',
+'?"我们只会收到你上面答的这些，不会拿到你的通讯录、位置或者别的任何东西。"',
+'   :"这个页面不会自己上传任何东西——你答的内容只留在你的手机上，除了你自己发给我们的那一段。";',
+/* 在线：直接 POST，客户不用离开页面 */
+'var sb=document.getElementById("send");',
+'if(sb)sb.addEventListener("click",function(){var msg=document.getElementById("copied");',
+'sb.disabled=true;msg.textContent="正在发送…";',
+'fetch(D.intakeUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})',
+'.then(function(r){if(!r.ok)throw 0;sb.textContent="已收到，谢谢你";msg.textContent="我们会一条条看。需要换款的会直接联系你。";})',
+/* 发送失败不能把客户卡死在这儿——退回离线那条路，内容还在 */
+'.catch(function(){sb.disabled=false;sb.textContent="再试一次";',
+'msg.innerHTML="没送出去（可能是网络）。再试一次，或者<button class=\'unlock\' id=\'fb\'>复制内容手动发给我们</button>";',
+'var fb=document.getElementById("fb");if(fb)fb.addEventListener("click",function(){copyOut(full);});});});',
+/* 离线：一次点击 = 复制 + 拉起微信。拉不起来也没关系，内容已经在剪贴板里 */
+'var cb=document.getElementById("cp");',
+'if(cb)cb.addEventListener("click",function(){copyOut(full);setTimeout(function(){',
+'try{location.href="weixin://";}catch(e){}},400);});',
 'window.scrollTo({top:0,behavior:"smooth"});}',
+'function copyOut(txt){var msg=document.getElementById("copied");',
+'function ok(){msg.textContent="已复制。粘到微信发给我们就行。";}',
+'try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok,fallback);return;}}catch(e){}',
+'fallback();',
+'function fallback(){var box=document.getElementById("out");',
+'if(!box){msg.textContent="请长按下面的文字复制。";return;}',
+'box.hidden=false;box.focus();box.select();box.setSelectionRange(0,box.value.length);',
+'try{document.execCommand("copy");ok();}catch(e){msg.textContent="已全选——长按选中的文字，选「复制」。";}}}',
 'render();})();',
 '<\/script></body></html>'
 ].join("\n");
@@ -1457,11 +1566,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   document.getElementById("brandmark").innerHTML=esc(CONFIG.brand)+"<small>"+esc(CONFIG.latin)+"</small>";
   document.getElementById("log-date").value=today();
   document.getElementById("log-save").addEventListener("click",saveLog);
+  document.getElementById("paste-go").addEventListener("click",importPaste);
   document.getElementById("round-save").addEventListener("click",saveRound);
   ["round-q","round-due"].forEach(function(id){ document.getElementById(id).addEventListener("input",renderRoundForm); });
   document.getElementById("rep-make").addEventListener("click",makeReport);
   document.getElementById("rep-save").addEventListener("click",saveReport);
   document.getElementById("cust-make").addEventListener("click",downloadCust);
+  document.getElementById("cust-intake").addEventListener("change",function(){
+    try{ localStorage.setItem(LS_INTAKE,this.value.trim()); }catch(e){}
+    setStatus(this.value.trim()?"提交地址已保存。记得重新导出一次客户页，新地址才会生效。":"提交地址已清空，客户页会走离线那条路。");
+  });
   document.getElementById("lib-add").addEventListener("click",function(){ addOwn(sel.lib,newGrade); });
   document.getElementById("lib-bench").addEventListener("click",function(){ addBench(sel.lib); });
   document.getElementById("lib-seed").addEventListener("click",function(){
